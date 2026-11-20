@@ -29,7 +29,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: theme.tint,
         tabBarInactiveTintColor: theme.textSecondary,
-        tabBarStyle: { backgroundColor: theme.background, borderTopColor: theme.border },
+        tabBarStyle: { backgroundColor: theme.background, borderTopColor: theme.border, ...(process.env.EXPO_OS === 'web' ? { height: 66, paddingBottom: 8 } : null) },
         tabBarLabelStyle: { fontFamily: FontFamily.semibold, fontSize: 11, lineHeight: 17 },
       }}>
       <Tabs.Screen

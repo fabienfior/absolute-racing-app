@@ -10,6 +10,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 
+import { HomeButton } from '@/components/home-button';
 import { Colors, FontFamily } from '@/constants/theme';
 import { LanguageProvider } from '@/i18n';
 import { SessionProvider } from '@/lib/session';
@@ -50,7 +51,11 @@ export default function RootLayout() {
         <SessionProvider>
           <ThemeProvider value={theme}>
             {/* Remount on language change so every label re-renders. */}
-            <Stack key={language} screenOptions={{ headerTitleStyle: { fontFamily: FontFamily.bold }, headerTintColor: c.text }}>
+            <Stack key={language} screenOptions={{
+                headerTitleStyle: { fontFamily: FontFamily.bold },
+                headerTintColor: c.text,
+                headerRight: () => <HomeButton />,
+              }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="welcome" options={{ headerShown: false, animation: 'fade' }} />
               <Stack.Screen name="sign-in" options={{ title: t('signin.title'), headerBackTitle: t('common.back') }} />
