@@ -45,18 +45,19 @@ export function TodayScreen() {
   const firstName = profile.name.split(' ')[0];
 
   return (
-    <Screen title={t('today.hi', { name: firstName })} right={<AlertBell />}>
+    <Screen logo right={<AlertBell />}>
+      <ThemedText type="subtitle">{t('today.hi', { name: firstName })}</ThemedText>
       <Row>
         <Pill label={profile.jobTitle} muted />
         {car ? <Pill label={`${t('today.car', { number: car.number })} · ${car.model}`} /> : null}
       </Row>
 
       {event ? (
-        <Card onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}>
-          <ThemedText type="small" themeColor="textSecondary">
+        <Card accent onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}>
+          <ThemedText type="label">
             {getChampionship(event.championshipId)?.short} · {formatDateRange(event.startDate, event.endDate)}
           </ThemedText>
-          <ThemedText style={{ fontWeight: 700, fontSize: 20 }}>{event.name}</ThemedText>
+          <ThemedText style={{ fontWeight: 900, fontSize: 26, lineHeight: 30, textTransform: 'uppercase' }}>{event.name}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {event.circuit}
           </ThemedText>
@@ -75,7 +76,7 @@ export function TodayScreen() {
                 <ThemedText type="small" themeColor="textSecondary" style={{ marginTop: live ? Spacing.two : 0 }}>
                   {t('today.next', { title: next.title })}
                 </ThemedText>
-                <ThemedText style={{ fontSize: 34, lineHeight: 40, fontWeight: 800, color: theme.tint, fontVariant: ['tabular-nums'] }}>
+                <ThemedText style={{ fontSize: 46, lineHeight: 52, fontWeight: 900, color: theme.tint, fontVariant: ['tabular-nums'] }}>
                   {formatCountdown(new Date(next.startsAt).getTime() - now)}
                 </ThemedText>
               </>

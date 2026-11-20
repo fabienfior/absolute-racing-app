@@ -59,11 +59,9 @@ export default function EventScreen() {
   return (
     <Screen>
       <Stack.Screen options={{ title: event.name }} />
-      <Card>
-        <ThemedText type="small" themeColor="textSecondary">
-          {getChampionship(event.championshipId)?.name}
-        </ThemedText>
-        <ThemedText style={{ fontWeight: 700, fontSize: 20 }}>{event.name}</ThemedText>
+      <Card accent>
+        <ThemedText type="label">{getChampionship(event.championshipId)?.name}</ThemedText>
+        <ThemedText style={{ fontWeight: 900, fontSize: 26, lineHeight: 30, textTransform: 'uppercase' }}>{event.name}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           {event.circuit} · {event.location}
         </ThemedText>

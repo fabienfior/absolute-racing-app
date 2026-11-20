@@ -58,4 +58,4 @@ English, French, Simplified Chinese, Japanese, Thai and Malay. The app follows t
 - Sign-in screen and Supabase-backed queries
 - Management editing screens (events, travel, crew, documents, news, guide)
 - Push notifications for alerts, documents and messages
-- Official logo, icon and team colours (currently placeholders)
+- App icon and splash screen artwork from the logo

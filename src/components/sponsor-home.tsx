@@ -14,7 +14,7 @@ export function SponsorHome() {
   const news = getNews(profile.role);
 
   return (
-    <Screen title={t('home.title')}>
+    <Screen logo>
       <SectionTitle>{t('home.nextEvent')}</SectionTitle>
       {next ? <EventCard event={next} highlight={t('home.upNext')} /> : <Empty>{t('home.noUpcoming')}</Empty>}
 
