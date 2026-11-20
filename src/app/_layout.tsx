@@ -52,6 +52,8 @@ export default function RootLayout() {
             {/* Remount on language change so every label re-renders. */}
             <Stack key={language} screenOptions={{ headerTitleStyle: { fontFamily: FontFamily.bold }, headerTintColor: c.text }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="welcome" options={{ headerShown: false, animation: 'fade' }} />
+              <Stack.Screen name="sign-in" options={{ title: t('signin.title'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="event/[id]" options={{ title: t('title.event'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="chat/[channelId]" options={{ title: t('title.chat'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="document/[id]" options={{ title: t('title.document'), headerBackTitle: t('common.back') }} />

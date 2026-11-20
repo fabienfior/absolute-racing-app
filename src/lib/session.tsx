@@ -10,6 +10,10 @@ import type { Alert, Member, Role, Target } from './types';
  * `document_reads` tables (with realtime updates and push notifications).
  */
 type AppState = {
+  /** null until the person picks Team or Guest on the welcome screen. */
+  entered: 'team' | 'guest' | null;
+  enter: (mode: 'team' | 'guest', role?: Role) => void;
+  signOut: () => void;
   profile: Member;
   setRole: (role: Role) => void;
   alerts: Alert[];
@@ -26,6 +30,12 @@ const DEMO_MEMBER: Record<Role, string> = { management: 'u-tm', driver: 'u-d1', 
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>('management');
+  const [entered, setEntered] = useState<'team' | 'guest' | null>(null);
+  const enter = useCallback((mode: 'team' | 'guest', r?: Role) => {
+    setRole(mode === 'guest' ? 'sponsor' : (r ?? 'management'));
+    setEntered(mode);
+  }, []);
+  const signOut = useCallback(() => setEntered(null), []);
   const [alerts, setAlerts] = useState<Alert[]>(demoAlerts);
   const [docReads, setDocReads] = useState<Record<string, string[]>>(documentReads);
   const [readAlertIds, setReadAlertIds] = useState<Set<string>>(new Set(['a3']));
@@ -56,8 +66,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ profile, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead }),
-    [profile, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead],
+    () => ({ entered, enter, signOut, profile, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead }),
+    [entered, enter, signOut, profile, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead],
   );
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

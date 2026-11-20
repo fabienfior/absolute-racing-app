@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Card, Chip, Icon, Row, Screen, SectionTitle } from '@/components/ui';
+import { Button, Card, Chip, Icon, Row, Screen, SectionTitle } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { getCar } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
@@ -13,7 +13,7 @@ import { LANGUAGES, t, useLanguage } from '@/i18n';
 const ROLES: Role[] = ['management', 'driver', 'sponsor'];
 
 export default function ProfileScreen() {
-  const { profile, setRole } = useSession();
+  const { profile, setRole, signOut } = useSession();
   const theme = useTheme();
   const car = getCar(profile.carId);
   const { language, setLanguage } = useLanguage();
@@ -74,6 +74,17 @@ export default function ProfileScreen() {
             </Pressable>
           );
         })}
+      </View>
+      <View style={{ marginTop: Spacing.four }}>
+        <Button
+          label={t('more.signOut')}
+          icon="log-out-outline"
+          secondary
+          onPress={() => {
+            signOut();
+            router.replace('/welcome');
+          }}
+        />
       </View>
     </Screen>
   );

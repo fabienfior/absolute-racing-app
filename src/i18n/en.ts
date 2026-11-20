@@ -149,6 +149,18 @@ export const en = {
   'time.justNow': 'just now',
   'time.minAgo': '{n}m ago',
   'time.hourAgo': '{n}h ago',
+  'welcome.tagline': 'Motorsport team hub',
+  'welcome.team': 'Team',
+  'welcome.teamHint': 'Sign in with your team account',
+  'welcome.guest': 'Fans & partners',
+  'welcome.guestHint': 'Calendar, results, news and videos, no account needed',
+  'signin.title': 'Team sign-in',
+  'signin.email': 'Work email',
+  'signin.send': 'Email me a sign-in link',
+  'signin.note': 'Ask the team manager to add your email if you are new.',
+  'signin.demo': 'Demo: enter as',
+  'signin.comingSoon': 'Sign-in links work once the app is connected to the database. Use the demo buttons below for now.',
+  'more.signOut': 'Sign out',
 };
 
 export type TranslationKey = keyof typeof en;

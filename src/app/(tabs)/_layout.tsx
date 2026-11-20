@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 
 import { FontFamily } from '@/constants/theme';
@@ -16,8 +16,10 @@ const icon =
 
 export default function TabLayout() {
   const theme = useTheme();
-  const { profile } = useSession();
+  const { profile, entered } = useSession();
   const team = isTeam(profile.role);
+
+  if (!entered) return <Redirect href="/welcome" />;
 
   return (
     <Tabs
