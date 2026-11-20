@@ -7,10 +7,11 @@ import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { TravelRow } from '@/components/travel-row';
 import { Button, Card, Empty, Icon, Row, Screen, SectionTitle } from '@/components/ui';
-import { getCar, getChampionship, getDocuments, getEvent, getMember, getMySessions, getTravel } from '@/data/queries';
+import { getCar, getChampionship, getDocuments, getEvent, getMember, getMySessions, getTeamResults, getTravel } from '@/data/queries';
 import { formatDateRange, formatDay, formatTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import { isTeam, type MediaLink } from '@/lib/types';
+import { useForecast, weatherLabel } from '@/lib/weather';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -27,6 +28,7 @@ export default function EventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useSession();
   const event = getEvent(id);
+  const forecast = useForecast(event?.latitude, event?.longitude);
 
   if (!event) {
     return (
@@ -37,6 +39,8 @@ export default function EventScreen() {
   }
 
   const team = isTeam(profile.role);
+  const results = getTeamResults(event.id);
+  const eventForecast = (forecast ?? []).filter((d) => d.date >= event.startDate && d.date <= event.endDate);
   const sessions = getMySessions(event.id, team ? profile : { ...profile, role: 'driver', carId: undefined });
   const days = [...new Set(sessions.map((s) => formatDay(s.startsAt)))];
   const docs = team ? getDocuments(profile).filter((d) => d.eventId === event.id) : [];
@@ -76,6 +80,52 @@ export default function EventScreen() {
           Open circuit in Maps
         </ThemedText>
       </Card>
+
+      {results.length ? (
+        <>
+          <SectionTitle>Our results</SectionTitle>
+          <Card style={{ gap: 8 }}>
+            {results.map((r) => (
+              <Row key={r.session + r.carId}>
+                <ThemedText style={{ width: 44, fontWeight: 800, fontSize: 20 }}>P{r.position}</ThemedText>
+                <View style={{ flex: 1 }}>
+                  <ThemedText type="small" style={{ fontWeight: 600 }}>
+                    {r.session} · Car {getCar(r.carId)?.number}
+                  </ThemedText>
+                  {r.classPosition ? (
+                    <ThemedText type="small" themeColor="textSecondary">
+                      P{r.classPosition} in {r.className}
+                    </ThemedText>
+                  ) : null}
+                </View>
+                {r.position <= 3 || r.classPosition === 1 ? <Icon name="trophy" size={20} /> : null}
+              </Row>
+            ))}
+          </Card>
+        </>
+      ) : null}
+
+      {eventForecast.length ? (
+        <>
+          <SectionTitle>Track weather</SectionTitle>
+          <Card style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+            {eventForecast.map((d) => (
+              <View key={d.date} style={{ alignItems: 'center', gap: 2 }}>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {new Date(d.date + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short' })}
+                </ThemedText>
+                <Icon name={weatherLabel(d.code).icon} size={26} />
+                <ThemedText type="smallBold">
+                  {d.max}° / {d.min}°
+                </ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  Rain {d.rainChance}%
+                </ThemedText>
+              </View>
+            ))}
+          </Card>
+        </>
+      ) : null}
 
       <SectionTitle>Live timing, results and videos</SectionTitle>
       {event.links.length ? (

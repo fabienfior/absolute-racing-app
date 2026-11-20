@@ -8,7 +8,9 @@ import type {
   Message,
   NewsPost,
   RaceEvent,
+  Standings,
   TeamDocument,
+  TeamResult,
 } from '@/lib/types';
 
 /**
@@ -208,4 +210,29 @@ export const channels: Channel[] = [
 export const messages: Message[] = [
   { id: 'm1', channelId: 'all-team', author: 'Alex Team Manager', body: 'Welcome to the team app!', sentAt: at(-3, 8) },
   { id: 'm2', channelId: 'drivers', author: 'Alex Team Manager', body: 'Debrief at 18:00 after practice.', sentAt: at(-1, 15) },
+];
+
+export const teamResults: TeamResult[] = [
+  { eventId: 'pcca-r1', session: 'Race 1', carId: 'car-b', position: 3, classPosition: 1, className: 'Pro-Am' },
+  { eventId: 'pcca-r1', session: 'Race 2', carId: 'car-b', position: 5, classPosition: 2, className: 'Pro-Am' },
+];
+
+export const standings: Standings[] = [
+  {
+    championshipId: 'pcca',
+    title: 'Drivers – Pro-Am',
+    updatedAt: at(-18, 20),
+    rows: [
+      { position: 1, name: 'Driver Three', points: 43, ours: true },
+      { position: 2, name: 'Rival driver A', points: 38 },
+      { position: 3, name: 'Rival driver B', points: 30 },
+      { position: 4, name: 'Rival driver C', points: 22 },
+    ],
+  },
+  {
+    championshipId: 'gtwca',
+    title: 'Teams',
+    updatedAt: at(-30, 12),
+    rows: [],
+  },
 ];

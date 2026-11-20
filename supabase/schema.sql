@@ -133,6 +133,26 @@ create table public.news_posts (
   published_at timestamptz not null default now()
 );
 
+-- Our finishing positions and championship standings, entered by management
+-- (none of the series offers a public results feed).
+create table public.team_results (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events on delete cascade,
+  session text not null,
+  car_id uuid not null references public.cars on delete cascade,
+  position int not null,
+  class_position int,
+  class_name text
+);
+
+create table public.standings (
+  id uuid primary key default gen_random_uuid(),
+  championship_id uuid not null references public.championships on delete cascade,
+  title text not null,
+  updated_at timestamptz not null default now(),
+  rows jsonb not null default '[]' -- [{position, name, points, ours}]
+);
+
 -- Targeting: who a document or alert is for.
 create type public.target_type as enum ('all', 'role', 'car');
 
@@ -223,6 +243,8 @@ alter table public.alerts enable row level security;
 alter table public.alert_reads enable row level security;
 alter table public.push_tokens enable row level security;
 alter table public.travel_members enable row level security;
+alter table public.team_results enable row level security;
+alter table public.standings enable row level security;
 alter table public.travel_items enable row level security;
 alter table public.event_links enable row level security;
 alter table public.news_posts enable row level security;
@@ -241,6 +263,10 @@ create policy "read sessions" on public.sessions for select to authenticated usi
 create policy "read championships" on public.championships for select to authenticated using (true);
 create policy "read cars" on public.cars for select to authenticated using (true);
 create policy "read links" on public.event_links for select to authenticated using (true);
+create policy "read results" on public.team_results for select to authenticated using (true);
+create policy "read standings" on public.standings for select to authenticated using (true);
+create policy "manage results" on public.team_results for all using (public.is_management()) with check (public.is_management());
+create policy "manage standings" on public.standings for all using (public.is_management()) with check (public.is_management());
 create policy "manage events" on public.events for all using (public.is_management()) with check (public.is_management());
 create policy "manage sessions" on public.sessions for all using (public.is_management()) with check (public.is_management());
 create policy "manage championships" on public.championships for all using (public.is_management()) with check (public.is_management());

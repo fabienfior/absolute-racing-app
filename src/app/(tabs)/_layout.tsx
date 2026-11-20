@@ -29,7 +29,7 @@ export default function TabLayout() {
         name="index"
         options={{ title: team ? 'Today' : 'Home', tabBarIcon: icon(team ? 'speedometer-outline' : 'home-outline') }}
       />
-      <Tabs.Screen name="events" options={{ title: 'Events', tabBarIcon: icon('flag-outline') }} />
+      <Tabs.Screen name="events" options={{ title: 'Season', tabBarIcon: icon('flag-outline') }} />
       <Tabs.Screen
         name="documents"
         options={{ title: 'Documents', tabBarIcon: icon('folder-open-outline'), href: team ? undefined : null }}

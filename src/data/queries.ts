@@ -1,4 +1,4 @@
-import { cars, championships, channels, documents, events, guide, members, messages, news } from '@/data/demo';
+import { cars, championships, channels, documents, events, guide, members, messages, news, standings, teamResults } from '@/data/demo';
 import { isForMember, isTeam, type Alert, type Member, type Role, type Target } from '@/lib/types';
 
 /**
@@ -99,3 +99,7 @@ export function getTravel(eventId: string, member: Member, everyone = false) {
     .filter((t) => everyone || t.memberIds.length === 0 || t.memberIds.includes(member.id))
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 }
+
+export const getChampionships = () => championships;
+export const getTeamResults = (eventId: string) => teamResults.filter((r) => r.eventId === eventId);
+export const getStandings = () => standings;

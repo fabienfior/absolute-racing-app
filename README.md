@@ -7,7 +7,8 @@ Built with Expo (React Native + TypeScript) and Supabase.
 
 | | Management | Drivers | Sponsors |
 |---|---|---|---|
-| News and event calendar | ✓ | ✓ | ✓ |
+| News and season calendar (filter by championship) | ✓ | ✓ | ✓ |
+| Our results, championship standings, track weather forecast | ✓ | ✓ | ✓ |
 | Live timing, results, videos, onboard links | ✓ | ✓ | ✓ |
 | Event schedule | ✓ | ✓ (plus own car's sessions) | ✓ |
 | Today dashboard (countdown, weather, today's schedule) | ✓ | ✓ | |
@@ -41,7 +42,7 @@ Use the Profile tab to preview it as management, a driver or a sponsor.
 
 ## Layout
 
-- `src/app/(tabs)/` – Today (sponsors: Home), Events, Documents, Messages, More
+- `src/app/(tabs)/` – Today (sponsors: Home), Season, Documents, Messages, More
 - `src/app/document/[id].tsx`, `alerts.tsx`, `notify.tsx` – document viewer with read receipts, alert inbox, send-an-alert
 - `src/app/event/[id].tsx` – event page (links, schedule, crew, documents, travel)
 - `src/app/chat/[channelId].tsx` – chat

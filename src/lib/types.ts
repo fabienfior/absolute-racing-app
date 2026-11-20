@@ -154,3 +154,21 @@ export function isForMember(target: Target, member: Member) {
   if (target.type === 'role') return target.role === member.role;
   return target.carId === member.carId;
 }
+
+/** Our cars' finishing positions, entered by management after each session. */
+export type TeamResult = {
+  eventId: string;
+  session: string; // e.g. "Race 1"
+  carId: string;
+  position: number;
+  classPosition?: number;
+  className?: string;
+};
+
+/** Championship standings, entered by management (no series offers a data feed). */
+export type Standings = {
+  championshipId: string;
+  title: string; // e.g. "Drivers – Pro-Am"
+  updatedAt: string;
+  rows: { position: number; name: string; points: number; ours?: boolean }[];
+};
