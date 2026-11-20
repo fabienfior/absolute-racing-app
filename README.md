@@ -14,7 +14,8 @@ Built with Expo (React Native + TypeScript) and Supabase.
 | Documents (briefings, run plans, bulletins…) | all | ones aimed at them or their car | |
 | Alerts | send + see all | ones aimed at them or their car | |
 | Read receipts | ✓ | | |
-| Crew roster and travel plans | ✓ | ✓ | |
+| Crew roster | ✓ | ✓ | |
+| Travel (flights, trains, rental cars, shuttles, hotels, restaurants) | everyone's | their own | |
 | Team guide and messaging | ✓ | ✓ | |
 | Crew phone numbers | ✓ | | |
 
@@ -52,6 +53,5 @@ Use the Profile tab to preview it as management, a driver or a sponsor.
 - Sign-in screen and Supabase-backed queries
 - Management editing screens (events, travel, crew, documents, news, guide)
 - Push notifications for alerts, documents and messages
-- Full travel itinerary (flights, trains, rental cars, hotels, restaurants)
 - Multiple languages
 - Official logo, icon and team colours (currently placeholders)

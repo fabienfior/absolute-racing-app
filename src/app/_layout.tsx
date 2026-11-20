@@ -23,6 +23,7 @@ export default function RootLayout() {
           <Stack.Screen name="document/[id]" options={{ title: 'Document', headerBackTitle: 'Back' }} />
           <Stack.Screen name="alerts" options={{ title: 'Alerts', headerBackTitle: 'Back' }} />
           <Stack.Screen name="notify" options={{ title: 'Send an alert', presentation: 'modal' }} />
+          <Stack.Screen name="travel/[eventId]" options={{ title: 'Travel', headerBackTitle: 'Back' }} />
           <Stack.Screen name="guide" options={{ title: 'Team guide', headerBackTitle: 'Back' }} />
         </Stack>
         <StatusBar style="auto" />

@@ -90,3 +90,12 @@ export function getChannels(role: Role) {
 export function getMessages(channelId: string) {
   return messages.filter((m) => m.channelId === channelId);
 }
+
+/** Travel items for one person (everyone-items plus their own), or all items for management's "Everyone" view. */
+export function getTravel(eventId: string, member: Member, everyone = false) {
+  const event = getEvent(eventId);
+  if (!event) return [];
+  return event.travel
+    .filter((t) => everyone || t.memberIds.length === 0 || t.memberIds.includes(member.id))
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+}

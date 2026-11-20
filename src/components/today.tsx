@@ -7,7 +7,7 @@ import { DocumentRow } from '@/components/document-row';
 import { ThemedText } from '@/components/themed-text';
 import { Button, Card, Empty, Icon, Pill, Row, Screen, SectionTitle } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
-import { getCar, getChampionship, getCurrentOrNextEvent, getDocuments, getMySessions } from '@/data/queries';
+import { getCar, getChampionship, getCurrentOrNextEvent, getDocuments, getMySessions, getTravel } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCountdown, formatDateRange, formatTime, isSameDay } from '@/lib/format';
 import { useSession } from '@/lib/session';
@@ -31,7 +31,14 @@ export function TodayScreen() {
   const sessions = event ? getMySessions(event.id, profile) : [];
   const live = sessions.find((s) => new Date(s.startsAt).getTime() <= now && new Date(s.endsAt).getTime() > now);
   const next = sessions.find((s) => new Date(s.startsAt).getTime() > now);
-  const todays = sessions.filter((s) => isSameDay(s.startsAt));
+  const travelToday = event
+    ? getTravel(event.id, profile)
+        .filter((t) => isSameDay(t.startsAt))
+        .map((t) => ({ id: t.id, startsAt: t.startsAt, endsAt: t.endsAt ?? t.startsAt, title: t.title, carId: undefined, travel: true }))
+    : [];
+  const todays = [...sessions.filter((s) => isSameDay(s.startsAt)), ...travelToday].sort((a, b) =>
+    a.startsAt.localeCompare(b.startsAt),
+  );
   const weather = useWeather(event?.latitude, event?.longitude);
   const unreadDocs = getDocuments(profile).filter((d) => !(docReads[d.id] ?? []).includes(profile.id));
   const firstName = profile.name.split(' ')[0];
@@ -111,6 +118,7 @@ export function TodayScreen() {
                   {formatTime(s.startsAt)}
                 </ThemedText>
                 <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: state === 'live' ? theme.tint : theme.border }} />
+                {'travel' in s ? <Icon name="bus-outline" size={14} /> : null}
                 <ThemedText type="small" style={{ flex: 1, fontWeight: state === 'live' ? 700 : 500 }}>
                   {s.title}
                   {s.carId ? ` (Car ${getCar(s.carId)?.number})` : ''}

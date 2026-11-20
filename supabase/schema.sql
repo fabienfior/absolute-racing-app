@@ -86,15 +86,30 @@ create table public.crew_assignments (
   primary key (event_id, member_id)
 );
 
-create type public.travel_kind as enum ('flight', 'hotel', 'transfer', 'other');
+create type public.travel_kind as enum ('flight', 'train', 'rental', 'shuttle', 'hotel', 'restaurant', 'other');
+create type public.travel_direction as enum ('outbound', 'onsite', 'return');
 
 create table public.travel_items (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events on delete cascade,
   kind public.travel_kind not null,
+  direction public.travel_direction not null default 'outbound',
   title text not null,
-  details text not null default '',
-  starts_at timestamptz
+  starts_at timestamptz not null,
+  ends_at timestamptz,
+  from_place text,
+  to_place text,
+  reference text,
+  address text,
+  phone text,
+  notes text
+);
+
+-- Who is on each booking. No rows = everyone at the event.
+create table public.travel_members (
+  travel_id uuid not null references public.travel_items on delete cascade,
+  member_id uuid not null references public.profiles on delete cascade,
+  primary key (travel_id, member_id)
 );
 
 create type public.link_kind as enum ('results', 'livetiming', 'stream', 'video', 'onboard', 'other');
@@ -207,6 +222,7 @@ alter table public.document_reads enable row level security;
 alter table public.alerts enable row level security;
 alter table public.alert_reads enable row level security;
 alter table public.push_tokens enable row level security;
+alter table public.travel_members enable row level security;
 alter table public.travel_items enable row level security;
 alter table public.event_links enable row level security;
 alter table public.news_posts enable row level security;
@@ -249,6 +265,8 @@ create policy "manage links" on public.event_links for all using (public.is_mana
 -- Travel plans and the team guide are team only.
 create policy "team reads travel" on public.travel_items for select using (public.is_team());
 create policy "manage travel" on public.travel_items for all using (public.is_management()) with check (public.is_management());
+create policy "team reads travel members" on public.travel_members for select using (public.is_team());
+create policy "manage travel members" on public.travel_members for all using (public.is_management()) with check (public.is_management());
 create policy "team reads guide" on public.guide_sections for select using (public.is_team());
 create policy "manage guide" on public.guide_sections for all using (public.is_management()) with check (public.is_management());
 

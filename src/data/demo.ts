@@ -71,9 +71,15 @@ export const events: RaceEvent[] = [
       { id: 's7', startsAt: at(1, 10), endsAt: at(1, 22), title: 'Race – 12 hours' },
     ],
     travel: [
-      { kind: 'flight', title: 'Outbound flight', details: 'Flight number and times', when: 'Arrive 2 days before' },
-      { kind: 'hotel', title: 'Team hotel', details: 'Hotel name, address and phone', when: 'Whole weekend' },
-      { kind: 'transfer', title: 'Shuttle to circuit', details: 'From hotel lobby', when: '07:00 daily' },
+      { id: 't1', kind: 'flight', direction: 'outbound', title: 'Flight XX 101', from: 'Hong Kong (HKG)', to: 'Kuala Lumpur (KUL)', startsAt: at(-3, 9, 10), endsAt: at(-3, 12, 55), reference: 'Booking ABC123', memberIds: ['u-tm', 'u-co', 'u-eng1', 'u-d1'] },
+      { id: 't2', kind: 'flight', direction: 'outbound', title: 'Flight XX 202', from: 'Shanghai (PVG)', to: 'Kuala Lumpur (KUL)', startsAt: at(-3, 8), endsAt: at(-3, 13, 40), reference: 'Booking DEF456', memberIds: ['u-d2', 'u-d3'] },
+      { id: 't3', kind: 'rental', direction: 'outbound', title: 'Rental car – 7-seater', from: 'KUL airport desk', startsAt: at(-3, 14), endsAt: at(2, 10), reference: 'Rental RNT789', notes: 'Driver: Sam. Return full tank.', memberIds: ['u-co'] },
+      { id: 't4', kind: 'shuttle', direction: 'outbound', title: 'Airport shuttle to hotel', from: 'KUL arrivals, exit 4', to: 'Team hotel', startsAt: at(-3, 14, 15), memberIds: [] },
+      { id: 't5', kind: 'hotel', direction: 'onsite', title: 'Team hotel', address: 'Sepang International Circuit, Malaysia', startsAt: at(-3, 15), endsAt: at(2, 11), reference: 'Group booking ART-12H', phone: '+60 0 000 0000', notes: 'Breakfast 06:00–10:00. Room list at reception.', memberIds: [] },
+      { id: 't6', kind: 'shuttle', direction: 'onsite', title: 'Shuttle to circuit', from: 'Hotel lobby', to: 'Paddock gate', startsAt: at(0, 6, 30), notes: 'Daily, 06:30 and 07:30', memberIds: [] },
+      { id: 't7', kind: 'restaurant', direction: 'onsite', title: 'Team dinner', address: 'Restaurant name and address', startsAt: at(-2, 20), phone: '+60 0 000 0001', memberIds: [] },
+      { id: 't8', kind: 'flight', direction: 'return', title: 'Flight XX 102', from: 'Kuala Lumpur (KUL)', to: 'Hong Kong (HKG)', startsAt: at(2, 14, 20), endsAt: at(2, 18, 5), reference: 'Booking ABC123', memberIds: ['u-tm', 'u-co', 'u-eng1', 'u-d1'] },
+      { id: 't9', kind: 'train', direction: 'return', title: 'KLIA Ekspres to city', from: 'Circuit', to: 'KL Sentral', startsAt: at(2, 9), endsAt: at(2, 10), memberIds: ['u-d2', 'u-d3'] },
     ],
     crew: [
       { memberId: 'u-tm', duty: 'Team manager' },

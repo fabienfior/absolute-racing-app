@@ -1,24 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Linking, View } from 'react-native';
 
 import { DocumentRow } from '@/components/document-row';
 import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
-import { Card, Empty, Icon, Row, Screen, SectionTitle } from '@/components/ui';
-import { getCar, getChampionship, getDocuments, getEvent, getMember, getMySessions } from '@/data/queries';
+import { TravelRow } from '@/components/travel-row';
+import { Button, Card, Empty, Icon, Row, Screen, SectionTitle } from '@/components/ui';
+import { getCar, getChampionship, getDocuments, getEvent, getMember, getMySessions, getTravel } from '@/data/queries';
 import { formatDateRange, formatDay, formatTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
-import { isTeam, type MediaLink, type TravelItem } from '@/lib/types';
+import { isTeam, type MediaLink } from '@/lib/types';
 
 type IconName = keyof typeof Ionicons.glyphMap;
-
-const travelIcon: Record<TravelItem['kind'], IconName> = {
-  flight: 'airplane-outline',
-  hotel: 'bed-outline',
-  transfer: 'car-outline',
-  other: 'ellipse-outline',
-};
 
 const linkIcon: Record<MediaLink['kind'], IconName> = {
   results: 'trophy-outline',
@@ -51,6 +45,10 @@ export default function EventScreen() {
     const key = c.carId ?? '';
     crewByCar.set(key, [...(crewByCar.get(key) ?? []), c]);
   }
+  // Next travel items for this person (upcoming first, else the start of the plan).
+  const allMine = team ? getTravel(event.id, profile) : [];
+  const upcoming = allMine.filter((t) => new Date(t.endsAt ?? t.startsAt).getTime() > Date.now());
+  const myTravel = upcoming.length ? upcoming : allMine;
   const canSeePhones = profile.role === 'management';
 
   return (
@@ -157,19 +155,19 @@ export default function EventScreen() {
           <SectionTitle>Documents</SectionTitle>
           {docs.length ? docs.map((d) => <DocumentRow key={d.id} doc={d} />) : <Empty>No documents for this event yet.</Empty>}
 
-          <SectionTitle>Travel plan</SectionTitle>
-          {event.travel.length ? (
-            event.travel.map((t) => (
-              <Card key={t.title} style={{ flexDirection: 'row', gap: 12 }}>
-                <Icon name={travelIcon[t.kind]} size={22} />
-                <View style={{ flex: 1 }}>
-                  <ThemedText style={{ fontWeight: 600 }}>{t.title}</ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    {t.when} · {t.details}
-                  </ThemedText>
-                </View>
-              </Card>
-            ))
+          <SectionTitle>Travel</SectionTitle>
+          {myTravel.length ? (
+            <>
+              {myTravel.slice(0, 2).map((t) => (
+                <TravelRow key={t.id} item={t} />
+              ))}
+              <Button
+                label="Full travel plan"
+                icon="airplane-outline"
+                secondary
+                onPress={() => router.push({ pathname: '/travel/[eventId]', params: { eventId: event.id } })}
+              />
+            </>
           ) : (
             <Empty>Travel plan coming soon.</Empty>
           )}

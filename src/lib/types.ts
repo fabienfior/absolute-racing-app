@@ -41,11 +41,22 @@ export type Session = {
   carId?: string; // only for one car; otherwise whole team
 };
 
+export type TravelKind = 'flight' | 'train' | 'rental' | 'shuttle' | 'hotel' | 'restaurant' | 'other';
+
 export type TravelItem = {
-  kind: 'flight' | 'hotel' | 'transfer' | 'other';
-  title: string;
-  details: string;
-  when: string;
+  id: string;
+  kind: TravelKind;
+  direction: 'outbound' | 'onsite' | 'return';
+  title: string; // e.g. "MH 123 Paris → Kuala Lumpur", "Team hotel"
+  startsAt: string; // ISO: departure / check-in / pick-up / reservation time
+  endsAt?: string; // arrival / check-out / drop-off
+  from?: string;
+  to?: string;
+  reference?: string; // booking or flight number
+  address?: string; // opens in Maps
+  phone?: string;
+  notes?: string;
+  memberIds: string[]; // empty = everyone at the event
 };
 
 export type CrewAssignment = {
