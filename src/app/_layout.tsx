@@ -1,18 +1,28 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { Colors } from '@/constants/theme';
+import { SessionProvider } from '@/lib/session';
 
-SplashScreen.preventAutoHideAsync();
+export default function RootLayout() {
+  const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const theme = {
+    ...base,
+    colors: { ...base.colors, primary: Colors[scheme].tint, background: Colors[scheme].background },
+  };
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <SessionProvider>
+      <ThemeProvider value={theme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="event/[id]" options={{ title: 'Event', headerBackTitle: 'Back' }} />
+          <Stack.Screen name="chat/[channelId]" options={{ title: 'Chat', headerBackTitle: 'Back' }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </SessionProvider>
   );
 }
