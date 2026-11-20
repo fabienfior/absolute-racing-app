@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import type { Message } from '@/lib/types';
+import { t } from '@/i18n';
 
 export default function ChatScreen() {
   const { channelId } = useLocalSearchParams<{ channelId: string }>();
@@ -33,7 +34,7 @@ export default function ChatScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.background }} behavior="padding">
-      <Stack.Screen options={{ title: channel ? `# ${channel.name}` : 'Chat' }} />
+      <Stack.Screen options={{ title: channel ? `# ${channel.name}` : t('title.chat') }} />
       <View style={{ flex: 1 }}>
         <Screen>
           {items.map((m) => (
@@ -51,11 +52,11 @@ export default function ChatScreen() {
           value={text}
           onChangeText={setText}
           onSubmitEditing={send}
-          placeholder="Write a message"
+          placeholder={t('messages.placeholder')}
           placeholderTextColor={theme.textSecondary}
           style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement }]}
         />
-        <Pressable onPress={send} accessibilityLabel="Send" style={styles.send}>
+        <Pressable onPress={send} accessibilityLabel={t('common.send')} style={styles.send}>
           <Icon name="send" color={theme.tint} size={22} />
         </Pressable>
       </View>

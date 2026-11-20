@@ -7,7 +7,8 @@ import { describeTarget, getAudience } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { timeAgo } from '@/lib/format';
 import { useSession } from '@/lib/session';
-import { DOC_CATEGORIES, type TeamDocument } from '@/lib/types';
+import type { TeamDocument } from '@/lib/types';
+import { t } from '@/i18n';
 
 const ICONS = {
   briefing: 'megaphone-outline',
@@ -25,7 +26,7 @@ export function DocumentRow({ doc }: { doc: TeamDocument }) {
   const isRead = readers.includes(profile.id);
   const audience = getAudience(doc.target);
   const readCount = audience.filter((m) => readers.includes(m.id)).length;
-  const category = DOC_CATEGORIES.find((c) => c.id === doc.category)?.label;
+  const category = t(`cat.${doc.category}`);
 
   return (
     <Card onPress={() => router.push({ pathname: '/document/[id]', params: { id: doc.id } })}>
@@ -38,7 +39,7 @@ export function DocumentRow({ doc }: { doc: TeamDocument }) {
           </ThemedText>
           {profile.role === 'management' ? (
             <ThemedText type="small" themeColor="textSecondary">
-              Read by {readCount} of {audience.length}
+              {t('docs.readBy', { count: readCount, total: audience.length })}
             </ThemedText>
           ) : null}
         </View>

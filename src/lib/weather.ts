@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { t } from '@/i18n';
 
 /** Track weather from Open-Meteo (free, no API key). */
 export type Weather = { temperature: number; rainChance: number; wind: number; code: number };
@@ -31,11 +32,11 @@ export function useWeather(lat?: number, lon?: number) {
 }
 
 export function weatherLabel(code: number): { label: string; icon: 'sunny-outline' | 'partly-sunny-outline' | 'cloudy-outline' | 'rainy-outline' | 'thunderstorm-outline' } {
-  if (code === 0) return { label: 'Clear', icon: 'sunny-outline' };
-  if (code <= 3) return { label: 'Partly cloudy', icon: 'partly-sunny-outline' };
-  if (code <= 48) return { label: 'Fog', icon: 'cloudy-outline' };
-  if (code <= 82) return { label: 'Rain', icon: 'rainy-outline' };
-  return { label: 'Storms', icon: 'thunderstorm-outline' };
+  if (code === 0) return { label: t('weather.clear'), icon: 'sunny-outline' };
+  if (code <= 3) return { label: t('weather.partly'), icon: 'partly-sunny-outline' };
+  if (code <= 48) return { label: t('weather.fog'), icon: 'cloudy-outline' };
+  if (code <= 82) return { label: t('weather.rain'), icon: 'rainy-outline' };
+  return { label: t('weather.storms'), icon: 'thunderstorm-outline' };
 }
 
 export type DayForecast = { date: string; max: number; min: number; rainChance: number; code: number };

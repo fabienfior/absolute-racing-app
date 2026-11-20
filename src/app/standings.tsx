@@ -5,6 +5,7 @@ import { Card, Empty, Row, Screen, SectionTitle } from '@/components/ui';
 import { getChampionship, getStandings } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate } from '@/lib/format';
+import { t } from '@/i18n';
 
 export default function StandingsScreen() {
   const theme = useTheme();
@@ -22,14 +23,14 @@ export default function StandingsScreen() {
                   <ThemedText style={{ flex: 1, fontWeight: r.ours ? 700 : 500, color: r.ours ? theme.tint : theme.text }}>
                     {r.name}
                   </ThemedText>
-                  <ThemedText style={{ fontVariant: ['tabular-nums'] }}>{r.points} pts</ThemedText>
+                  <ThemedText style={{ fontVariant: ['tabular-nums'] }}>{t('standings.pts', { points: r.points })}</ThemedText>
                 </Row>
               ))
             ) : (
-              <Empty>Standings will appear after the first round.</Empty>
+              <Empty>{t('standings.empty')}</Empty>
             )}
             <ThemedText type="small" themeColor="textSecondary">
-              Updated {formatDate(st.updatedAt)}
+              {t('standings.updated', { date: formatDate(st.updatedAt) })}
             </ThemedText>
           </Card>
         </View>

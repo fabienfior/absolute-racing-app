@@ -8,7 +8,7 @@ import { Button, Card, Empty, Icon, Row, Screen, SectionTitle } from '@/componen
 import { describeTarget, getAudience, getDocument, getEvent } from '@/data/queries';
 import { formatDate, formatTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
-import { DOC_CATEGORIES } from '@/lib/types';
+import { t } from '@/i18n';
 
 export default function DocumentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -23,7 +23,7 @@ export default function DocumentScreen() {
   if (!doc) {
     return (
       <Screen>
-        <Empty>Document not found.</Empty>
+        <Empty>{t('docs.notFound')}</Empty>
       </Screen>
     );
   }
@@ -36,19 +36,19 @@ export default function DocumentScreen() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: DOC_CATEGORIES.find((c) => c.id === doc.category)?.label ?? 'Document' }} />
+      <Stack.Screen options={{ title: t(`cat.${doc.category}`) }} />
       <Card>
         <ThemedText style={{ fontWeight: 700, fontSize: 20 }}>{doc.title}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          {event ? `${event.name} · ` : ''}For {describeTarget(doc.target).toLowerCase()}
+          {event ? `${event.name} · ` : ''}{t('docs.for', { target: describeTarget(doc.target) })}
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          Published {formatDate(doc.publishedAt)} at {formatTime(doc.publishedAt)}
+          {t('docs.published', { date: formatDate(doc.publishedAt), time: formatTime(doc.publishedAt) })}
         </ThemedText>
       </Card>
-      <Button label="Open document" icon="document-text-outline" onPress={open} />
+      <Button label={t('docs.open')} icon="document-text-outline" onPress={open} />
       <Button
-        label="Share"
+        label={t('common.share')}
         icon="share-outline"
         secondary
         onPress={() => Share.share({ message: `${doc.title}\n${doc.url}` }).catch(() => {})}
@@ -57,7 +57,7 @@ export default function DocumentScreen() {
       {profile.role === 'management' ? (
         <>
           <SectionTitle>
-            Read by {audience.filter((m) => readers.includes(m.id)).length} of {audience.length}
+            {t('docs.readBy', { count: audience.filter((m) => readers.includes(m.id)).length, total: audience.length })}
           </SectionTitle>
           <Card style={{ gap: 8 }}>
             {audience.map((m) => {
@@ -69,7 +69,7 @@ export default function DocumentScreen() {
                     {m.name}
                   </ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
-                    {read ? 'Read' : 'Not yet'}
+                    {read ? t('docs.read') : t('docs.notYet')}
                   </ThemedText>
                 </Row>
               );

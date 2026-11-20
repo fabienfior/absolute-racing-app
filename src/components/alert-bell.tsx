@@ -6,6 +6,7 @@ import { Icon } from '@/components/ui';
 import { getMyAlerts } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/lib/session';
+import { t } from '@/i18n';
 
 export function AlertBell() {
   const theme = useTheme();
@@ -13,7 +14,7 @@ export function AlertBell() {
   const unread = getMyAlerts(alerts, profile).filter((a) => !readAlertIds.has(a.id)).length;
 
   return (
-    <Pressable onPress={() => router.push('/alerts')} accessibilityLabel={`Alerts, ${unread} unread`} style={{ padding: 6 }}>
+    <Pressable onPress={() => router.push('/alerts')} accessibilityLabel={t('alerts.unread', { count: unread })} style={{ padding: 6 }}>
       <Icon name="notifications-outline" size={26} />
       {unread > 0 ? (
         <View

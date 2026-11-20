@@ -1,5 +1,6 @@
 import { cars, championships, channels, documents, events, guide, members, messages, news, standings, teamResults } from '@/data/demo';
 import { isForMember, isTeam, type Alert, type Member, type Role, type Target } from '@/lib/types';
+import { t } from '@/i18n';
 
 /**
  * Data access in one place. Each function maps to a Supabase query later;
@@ -69,10 +70,10 @@ export function getAudience(target: Target) {
 }
 
 export function describeTarget(target: Target) {
-  if (target.type === 'all') return 'Whole team';
-  if (target.type === 'role') return target.role === 'driver' ? 'Drivers' : 'Management';
+  if (target.type === 'all') return t('target.all');
+  if (target.type === 'role') return target.role === 'driver' ? t('target.drivers') : t('target.management');
   const car = getCar(target.carId);
-  return car ? `Car ${car.number}` : 'One car';
+  return car ? t('today.car', { number: car.number }) : '';
 }
 
 export function getMyAlerts(alerts: Alert[], member: Member) {

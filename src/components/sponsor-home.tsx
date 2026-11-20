@@ -6,6 +6,7 @@ import { Card, Empty, Screen, SectionTitle } from '@/components/ui';
 import { getCurrentOrNextEvent, getNews } from '@/data/queries';
 import { formatDate } from '@/lib/format';
 import { useSession } from '@/lib/session';
+import { t } from '@/i18n';
 
 export function SponsorHome() {
   const { profile } = useSession();
@@ -13,11 +14,11 @@ export function SponsorHome() {
   const news = getNews(profile.role);
 
   return (
-    <Screen title="Absolute Racing">
-      <SectionTitle>Next event</SectionTitle>
-      {next ? <EventCard event={next} highlight="Up next" /> : <Empty>No upcoming events yet.</Empty>}
+    <Screen title={t('home.title')}>
+      <SectionTitle>{t('home.nextEvent')}</SectionTitle>
+      {next ? <EventCard event={next} highlight={t('home.upNext')} /> : <Empty>{t('home.noUpcoming')}</Empty>}
 
-      <SectionTitle>Latest news</SectionTitle>
+      <SectionTitle>{t('home.latestNews')}</SectionTitle>
       {news.map((post) => (
         <Card
           key={post.id}

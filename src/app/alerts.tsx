@@ -7,6 +7,7 @@ import { describeTarget, getMyAlerts } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { timeAgo } from '@/lib/format';
 import { useSession } from '@/lib/session';
+import { t } from '@/i18n';
 
 export default function AlertsScreen() {
   const theme = useTheme();
@@ -16,7 +17,7 @@ export default function AlertsScreen() {
   return (
     <Screen>
       {profile.role === 'management' ? (
-        <Button label="Send an alert" icon="megaphone-outline" onPress={() => router.push('/notify')} />
+        <Button label={t('title.sendAlert')} icon="megaphone-outline" onPress={() => router.push('/notify')} />
       ) : null}
       {mine.length ? (
         mine.map((a) => {
@@ -34,7 +35,7 @@ export default function AlertsScreen() {
                   <ThemedText type="small">{a.body}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
                     {a.sentBy} → {describeTarget(a.target)} · {timeAgo(a.sentAt)}
-                    {a.documentId ? ' · Tap to open document' : ''}
+                    {a.documentId ? ` · ${t('alerts.tapToOpen')}` : ''}
                   </ThemedText>
                 </View>
                 {unread ? <Dot color={theme.tint} /> : null}
@@ -43,7 +44,7 @@ export default function AlertsScreen() {
           );
         })
       ) : (
-        <Empty>No alerts yet.</Empty>
+        <Empty>{t('alerts.empty')}</Empty>
       )}
     </Screen>
   );

@@ -5,6 +5,7 @@ import type { ColorValue } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/lib/session';
 import { isTeam } from '@/lib/types';
+import { t } from '@/i18n';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -27,18 +28,18 @@ export default function TabLayout() {
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: team ? 'Today' : 'Home', tabBarIcon: icon(team ? 'speedometer-outline' : 'home-outline') }}
+        options={{ title: team ? t('tab.today') : t('tab.home'), tabBarIcon: icon(team ? 'speedometer-outline' : 'home-outline') }}
       />
-      <Tabs.Screen name="events" options={{ title: 'Season', tabBarIcon: icon('flag-outline') }} />
+      <Tabs.Screen name="events" options={{ title: t('tab.season'), tabBarIcon: icon('flag-outline') }} />
       <Tabs.Screen
         name="documents"
-        options={{ title: 'Documents', tabBarIcon: icon('folder-open-outline'), href: team ? undefined : null }}
+        options={{ title: t('tab.documents'), tabBarIcon: icon('folder-open-outline'), href: team ? undefined : null }}
       />
       <Tabs.Screen
         name="messages"
-        options={{ title: 'Messages', tabBarIcon: icon('chatbubbles-outline'), href: team ? undefined : null }}
+        options={{ title: t('tab.messages'), tabBarIcon: icon('chatbubbles-outline'), href: team ? undefined : null }}
       />
-      <Tabs.Screen name="profile" options={{ title: 'More', tabBarIcon: icon('person-circle-outline') }} />
+      <Tabs.Screen name="profile" options={{ title: t('tab.more'), tabBarIcon: icon('person-circle-outline') }} />
     </Tabs>
   );
 }

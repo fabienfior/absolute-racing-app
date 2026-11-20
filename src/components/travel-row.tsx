@@ -6,6 +6,8 @@ import { Card, Icon, Row } from '@/components/ui';
 import { getMember } from '@/data/queries';
 import { formatTime } from '@/lib/format';
 import type { TravelItem, TravelKind } from '@/lib/types';
+import { locale, t } from '@/i18n';
+import type { TranslationKey } from '@/i18n/en';
 
 export const TRAVEL_ICON: Record<TravelKind, keyof typeof Ionicons.glyphMap> = {
   flight: 'airplane-outline',
@@ -17,8 +19,8 @@ export const TRAVEL_ICON: Record<TravelKind, keyof typeof Ionicons.glyphMap> = {
   other: 'ellipse-outline',
 };
 
-const START_LABEL: Partial<Record<TravelKind, string>> = { hotel: 'Check-in', rental: 'Pick-up', restaurant: 'Table at' };
-const END_LABEL: Partial<Record<TravelKind, string>> = { hotel: 'Check-out', rental: 'Drop-off', flight: 'Arrives', train: 'Arrives' };
+const START_LABEL: Partial<Record<TravelKind, TranslationKey>> = { hotel: 'travel.checkIn', rental: 'travel.pickUp', restaurant: 'travel.tableAt' };
+const END_LABEL: Partial<Record<TravelKind, TranslationKey>> = { hotel: 'travel.checkOut', rental: 'travel.dropOff', flight: 'travel.arrives', train: 'travel.arrives' };
 
 export function TravelRow({ item, showPeople }: { item: TravelItem; showPeople?: boolean }) {
   const end = item.endsAt ? new Date(item.endsAt) : undefined;
@@ -39,9 +41,9 @@ export function TravelRow({ item, showPeople }: { item: TravelItem; showPeople?:
             </ThemedText>
           ) : null}
           <ThemedText type="small" themeColor="textSecondary">
-            {START_LABEL[item.kind] ?? 'Departs'} {formatTime(item.startsAt)}
+            {t(START_LABEL[item.kind] ?? 'travel.departs')} {formatTime(item.startsAt)}
             {end
-              ? ` · ${END_LABEL[item.kind] ?? 'Until'} ${multiDay ? end.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) + ' ' : ''}${formatTime(item.endsAt!)}`
+              ? ` · ${t(END_LABEL[item.kind] ?? 'travel.until')} ${multiDay ? end.toLocaleDateString(locale(), { weekday: 'short', day: 'numeric', month: 'short' }) + ' ' : ''}${formatTime(item.endsAt!)}`
               : ''}
           </ThemedText>
           {item.reference ? (
@@ -52,7 +54,7 @@ export function TravelRow({ item, showPeople }: { item: TravelItem; showPeople?:
           {item.notes ? <ThemedText type="small">{item.notes}</ThemedText> : null}
           {showPeople ? (
             <ThemedText type="small" themeColor="textSecondary">
-              {people.length ? people.join(', ') : 'Everyone'}
+              {people.length ? people.join(', ') : t('common.everyone')}
             </ThemedText>
           ) : null}
           <Row style={{ gap: 16, marginTop: 4 }}>
@@ -60,12 +62,12 @@ export function TravelRow({ item, showPeople }: { item: TravelItem; showPeople?:
               <ThemedText
                 type="linkPrimary"
                 onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address!)}`)}>
-                Map
+                {t('common.map')}
               </ThemedText>
             ) : null}
             {item.phone ? (
               <ThemedText type="linkPrimary" onPress={() => Linking.openURL(`tel:${item.phone}`)}>
-                Call
+                {t('common.call')}
               </ThemedText>
             ) : null}
           </Row>

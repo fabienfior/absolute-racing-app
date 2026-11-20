@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Chip, Empty, Screen, SectionTitle } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { getChampionships, getPastEvents, getUpcomingEvents } from '@/data/queries';
+import { t } from '@/i18n';
 
 export default function EventsScreen() {
   const [champ, setChamp] = useState<string | null>(null);
@@ -16,22 +17,22 @@ export default function EventsScreen() {
 
   return (
     <Screen
-      title="Season"
+      title={t('season.title')}
       right={
         <ThemedText type="linkPrimary" onPress={() => router.push('/standings')}>
-          Standings
+          {t('title.standings')}
         </ThemedText>
       }>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: Spacing.two }}>
-        <Chip label="All" active={!champ} onPress={() => setChamp(null)} />
+        <Chip label={t('common.all')} active={!champ} onPress={() => setChamp(null)} />
         {getChampionships().map((c) => (
           <Chip key={c.id} label={c.short} active={champ === c.id} onPress={() => setChamp(c.id)} />
         ))}
       </ScrollView>
-      <SectionTitle>Upcoming</SectionTitle>
-      {upcoming.length ? upcoming.map((e) => <EventCard key={e.id} event={e} />) : <Empty>Nothing scheduled.</Empty>}
-      <SectionTitle>Past</SectionTitle>
-      {past.length ? past.map((e) => <EventCard key={e.id} event={e} />) : <Empty>No past events.</Empty>}
+      <SectionTitle>{t('season.upcoming')}</SectionTitle>
+      {upcoming.length ? upcoming.map((e) => <EventCard key={e.id} event={e} />) : <Empty>{t('season.nothing')}</Empty>}
+      <SectionTitle>{t('season.past')}</SectionTitle>
+      {past.length ? past.map((e) => <EventCard key={e.id} event={e} />) : <Empty>{t('season.noPast')}</Empty>}
     </Screen>
   );
 }

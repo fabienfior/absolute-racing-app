@@ -40,6 +40,10 @@ Use the Profile tab to preview it as management, a driver or a sponsor.
 2. Run `supabase/schema.sql` in the SQL editor.
 3. Copy `.env.example` to `.env` and fill in the URL and anon key.
 
+## Languages
+
+English, French, Simplified Chinese, Japanese, Thai and Malay. The app follows the phone's language and can be changed under More. Translations live in `src/i18n/` (one file per language, same keys as `en.ts`). Content the team writes (event names, documents, news) is shown as written.
+
 ## Layout
 
 - `src/app/(tabs)/` – Today (sponsors: Home), Season, Documents, Messages, More
@@ -54,5 +58,4 @@ Use the Profile tab to preview it as management, a driver or a sponsor.
 - Sign-in screen and Supabase-backed queries
 - Management editing screens (events, travel, crew, documents, news, guide)
 - Push notifications for alerts, documents and messages
-- Multiple languages
 - Official logo, icon and team colours (currently placeholders)

@@ -12,6 +12,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatCountdown, formatDateRange, formatTime, isSameDay } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import { useWeather, weatherLabel } from '@/lib/weather';
+import { t } from '@/i18n';
 
 function useNow(intervalMs = 1000) {
   const [now, setNow] = useState(() => Date.now());
@@ -44,10 +45,10 @@ export function TodayScreen() {
   const firstName = profile.name.split(' ')[0];
 
   return (
-    <Screen title={`Hi ${firstName}`} right={<AlertBell />}>
+    <Screen title={t('today.hi', { name: firstName })} right={<AlertBell />}>
       <Row>
         <Pill label={profile.jobTitle} muted />
-        {car ? <Pill label={`Car ${car.number} · ${car.model}`} /> : null}
+        {car ? <Pill label={`${t('today.car', { number: car.number })} · ${car.model}`} /> : null}
       </Row>
 
       {event ? (
@@ -62,17 +63,17 @@ export function TodayScreen() {
           <View style={{ marginTop: Spacing.two, gap: 2 }}>
             {live ? (
               <>
-                <Pill label="On now" />
+                <Pill label={t('today.onNow')} />
                 <ThemedText style={{ fontWeight: 700 }}>{live.title}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  Ends {formatTime(live.endsAt)}
+                  {t('today.ends', { time: formatTime(live.endsAt) })}
                 </ThemedText>
               </>
             ) : null}
             {next ? (
               <>
                 <ThemedText type="small" themeColor="textSecondary" style={{ marginTop: live ? Spacing.two : 0 }}>
-                  Next: {next.title}
+                  {t('today.next', { title: next.title })}
                 </ThemedText>
                 <ThemedText style={{ fontSize: 34, lineHeight: 40, fontWeight: 800, color: theme.tint, fontVariant: ['tabular-nums'] }}>
                   {formatCountdown(new Date(next.startsAt).getTime() - now)}
@@ -82,7 +83,7 @@ export function TodayScreen() {
           </View>
         </Card>
       ) : (
-        <Empty>No upcoming events.</Empty>
+        <Empty>{t('today.noUpcoming')}</Empty>
       )}
 
       {weather ? (
@@ -94,7 +95,7 @@ export function TodayScreen() {
                 {weather.temperature}°C · {weatherLabel(weather.code).label}
               </ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                Track weather · Rain {weather.rainChance}% · Wind {weather.wind} km/h
+                {t('today.weather', { rain: weather.rainChance, wind: weather.wind })}
               </ThemedText>
             </View>
           </Row>
@@ -102,10 +103,10 @@ export function TodayScreen() {
       ) : null}
 
       {profile.role === 'management' ? (
-        <Button label="Send an alert" icon="megaphone-outline" onPress={() => router.push('/notify')} />
+        <Button label={t('title.sendAlert')} icon="megaphone-outline" onPress={() => router.push('/notify')} />
       ) : null}
 
-      <SectionTitle>Today</SectionTitle>
+      <SectionTitle>{t('today.schedule')}</SectionTitle>
       {todays.length ? (
         <Card style={{ gap: Spacing.two }}>
           {todays.map((s) => {
@@ -121,25 +122,25 @@ export function TodayScreen() {
                 {'travel' in s ? <Icon name="bus-outline" size={14} /> : null}
                 <ThemedText type="small" style={{ flex: 1, fontWeight: state === 'live' ? 700 : 500 }}>
                   {s.title}
-                  {s.carId ? ` (Car ${getCar(s.carId)?.number})` : ''}
+                  {s.carId ? ` (${t('today.car', { number: getCar(s.carId)?.number ?? '' })})` : ''}
                 </ThemedText>
               </Row>
             );
           })}
         </Card>
       ) : (
-        <Empty>Nothing scheduled today.</Empty>
+        <Empty>{t('today.nothingToday')}</Empty>
       )}
 
       <SectionTitle
         right={
           <ThemedText type="linkPrimary" onPress={() => router.push('/documents')}>
-            All documents
+            {t('today.allDocuments')}
           </ThemedText>
         }>
-        To read
+        {t('today.toRead')}
       </SectionTitle>
-      {unreadDocs.length ? unreadDocs.slice(0, 3).map((d) => <DocumentRow key={d.id} doc={d} />) : <Empty>You’re all caught up.</Empty>}
+      {unreadDocs.length ? unreadDocs.slice(0, 3).map((d) => <DocumentRow key={d.id} doc={d} />) : <Empty>{t('today.caughtUp')}</Empty>}
     </Screen>
   );
 }

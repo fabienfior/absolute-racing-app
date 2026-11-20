@@ -9,6 +9,7 @@ import { describeTarget, getAudience, getCars } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/lib/session';
 import type { Target } from '@/lib/types';
+import { t } from '@/i18n';
 
 const TARGETS: Target[] = [
   { type: 'all' },
@@ -27,7 +28,7 @@ export default function NotifyScreen() {
   if (profile.role !== 'management') {
     return (
       <Screen>
-        <ThemedText>Only management can send alerts.</ThemedText>
+        <ThemedText>{t('notify.onlyManagement')}</ThemedText>
       </Screen>
     );
   }
@@ -37,7 +38,7 @@ export default function NotifyScreen() {
 
   return (
     <Screen>
-      <SectionTitle>Send to</SectionTitle>
+      <SectionTitle>{t('notify.sendTo')}</SectionTitle>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two }}>
         {TARGETS.map((t) => (
           <Chip
@@ -49,21 +50,21 @@ export default function NotifyScreen() {
         ))}
       </View>
       <ThemedText type="small" themeColor="textSecondary">
-        Reaches {getAudience(target).length} people
+        {t('notify.reaches', { count: getAudience(target).length })}
       </ThemedText>
 
-      <SectionTitle>Message</SectionTitle>
-      <TextInput value={title} onChangeText={setTitle} placeholder="Title" placeholderTextColor={theme.textSecondary} style={input} />
+      <SectionTitle>{t('notify.message')}</SectionTitle>
+      <TextInput value={title} onChangeText={setTitle} placeholder={t('notify.titlePlaceholder')} placeholderTextColor={theme.textSecondary} style={input} />
       <TextInput
         value={body}
         onChangeText={setBody}
-        placeholder="Details (optional)"
+        placeholder={t('notify.detailsPlaceholder')}
         placeholderTextColor={theme.textSecondary}
         multiline
         style={[input, { minHeight: 100, textAlignVertical: 'top' }]}
       />
       <Button
-        label="Send alert"
+        label={t('notify.send')}
         icon="send"
         onPress={() => {
           if (!canSend) return;

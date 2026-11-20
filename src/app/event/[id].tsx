@@ -12,6 +12,7 @@ import { formatDateRange, formatDay, formatTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import { isTeam, type MediaLink } from '@/lib/types';
 import { useForecast, weatherLabel } from '@/lib/weather';
+import { locale, t } from '@/i18n';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -33,7 +34,7 @@ export default function EventScreen() {
   if (!event) {
     return (
       <Screen>
-        <Empty>Event not found.</Empty>
+        <Empty>{t('event.notFound')}</Empty>
       </Screen>
     );
   }
@@ -77,24 +78,24 @@ export default function EventScreen() {
           onPress={() =>
             Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`)
           }>
-          Open circuit in Maps
+          {t('event.openMaps')}
         </ThemedText>
       </Card>
 
       {results.length ? (
         <>
-          <SectionTitle>Our results</SectionTitle>
+          <SectionTitle>{t('event.ourResults')}</SectionTitle>
           <Card style={{ gap: 8 }}>
             {results.map((r) => (
               <Row key={r.session + r.carId}>
                 <ThemedText style={{ width: 44, fontWeight: 800, fontSize: 20 }}>P{r.position}</ThemedText>
                 <View style={{ flex: 1 }}>
                   <ThemedText type="small" style={{ fontWeight: 600 }}>
-                    {r.session} · Car {getCar(r.carId)?.number}
+                    {r.session} · {t('today.car', { number: getCar(r.carId)?.number ?? '' })}
                   </ThemedText>
                   {r.classPosition ? (
                     <ThemedText type="small" themeColor="textSecondary">
-                      P{r.classPosition} in {r.className}
+                      {t('event.classPos', { pos: r.classPosition, class: r.className ?? '' })}
                     </ThemedText>
                   ) : null}
                 </View>
@@ -107,19 +108,19 @@ export default function EventScreen() {
 
       {eventForecast.length ? (
         <>
-          <SectionTitle>Track weather</SectionTitle>
+          <SectionTitle>{t('event.trackWeather')}</SectionTitle>
           <Card style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
             {eventForecast.map((d) => (
               <View key={d.date} style={{ alignItems: 'center', gap: 2 }}>
                 <ThemedText type="small" themeColor="textSecondary">
-                  {new Date(d.date + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short' })}
+                  {new Date(d.date + 'T12:00:00').toLocaleDateString(locale(), { weekday: 'short' })}
                 </ThemedText>
                 <Icon name={weatherLabel(d.code).icon} size={26} />
                 <ThemedText type="smallBold">
                   {d.max}° / {d.min}°
                 </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  Rain {d.rainChance}%
+                  {t('event.rain', { rain: d.rainChance })}
                 </ThemedText>
               </View>
             ))}
@@ -127,7 +128,7 @@ export default function EventScreen() {
         </>
       ) : null}
 
-      <SectionTitle>Live timing, results and videos</SectionTitle>
+      <SectionTitle>{t('event.links')}</SectionTitle>
       {event.links.length ? (
         event.links.map((l) => (
           <ExternalLink key={l.kind + l.label} href={l.url as `https://${string}`} asChild>
@@ -138,10 +139,10 @@ export default function EventScreen() {
           </ExternalLink>
         ))
       ) : (
-        <Empty>Links will appear here closer to the event.</Empty>
+        <Empty>{t('event.noLinks')}</Empty>
       )}
 
-      <SectionTitle>Schedule</SectionTitle>
+      <SectionTitle>{t('event.schedule')}</SectionTitle>
       {days.length ? (
         days.map((day) => (
           <Card key={day} style={{ gap: 6 }}>
@@ -155,25 +156,25 @@ export default function EventScreen() {
                   </ThemedText>
                   <ThemedText type="small" style={{ flex: 1 }}>
                     {s.title}
-                    {s.carId ? ` (Car ${getCar(s.carId)?.number})` : ''}
+                    {s.carId ? ` (${t('today.car', { number: getCar(s.carId)?.number ?? '' })})` : ''}
                   </ThemedText>
                 </Row>
               ))}
           </Card>
         ))
       ) : (
-        <Empty>Schedule not published yet.</Empty>
+        <Empty>{t('event.noSchedule')}</Empty>
       )}
 
       {team ? (
         <>
-          <SectionTitle>Crew and cars</SectionTitle>
+          <SectionTitle>{t('event.crew')}</SectionTitle>
           {event.crew.length ? (
             [...crewByCar.entries()].map(([carId, crew]) => {
               const car = getCar(carId);
               return (
                 <Card key={carId || 'team'} style={{ gap: 8 }}>
-                  <ThemedText type="smallBold">{car ? `Car ${car.number} · ${car.model}` : 'Team'}</ThemedText>
+                  <ThemedText type="smallBold">{car ? `${t('today.car', { number: car.number })} · ${car.model}` : t('event.team')}</ThemedText>
                   {crew.map((c) => {
                     const m = getMember(c.memberId);
                     if (!m) return null;
@@ -183,14 +184,14 @@ export default function EventScreen() {
                         <View style={{ flex: 1 }}>
                           <ThemedText type="small" style={{ fontWeight: 600 }}>
                             {m.name}
-                            {m.id === profile.id ? ' (you)' : ''}
+                            {m.id === profile.id ? ` (${t('common.you')})` : ''}
                           </ThemedText>
                           <ThemedText type="small" themeColor="textSecondary">
                             {c.duty}
                           </ThemedText>
                         </View>
                         {canSeePhones && m.phone ? (
-                          <Icon name="call-outline" onPress={() => Linking.openURL(`tel:${m.phone}`)} accessibilityLabel={`Call ${m.name}`} />
+                          <Icon name="call-outline" onPress={() => Linking.openURL(`tel:${m.phone}`)} accessibilityLabel={`${t('common.call')} ${m.name}`} />
                         ) : null}
                       </Row>
                     );
@@ -199,27 +200,27 @@ export default function EventScreen() {
               );
             })
           ) : (
-            <Empty>Crew list coming soon.</Empty>
+            <Empty>{t('event.noCrew')}</Empty>
           )}
 
-          <SectionTitle>Documents</SectionTitle>
-          {docs.length ? docs.map((d) => <DocumentRow key={d.id} doc={d} />) : <Empty>No documents for this event yet.</Empty>}
+          <SectionTitle>{t('event.documents')}</SectionTitle>
+          {docs.length ? docs.map((d) => <DocumentRow key={d.id} doc={d} />) : <Empty>{t('event.noDocuments')}</Empty>}
 
-          <SectionTitle>Travel</SectionTitle>
+          <SectionTitle>{t('event.travel')}</SectionTitle>
           {myTravel.length ? (
             <>
               {myTravel.slice(0, 2).map((t) => (
                 <TravelRow key={t.id} item={t} />
               ))}
               <Button
-                label="Full travel plan"
+                label={t('event.fullTravel')}
                 icon="airplane-outline"
                 secondary
                 onPress={() => router.push({ pathname: '/travel/[eventId]', params: { eventId: event.id } })}
               />
             </>
           ) : (
-            <Empty>Travel plan coming soon.</Empty>
+            <Empty>{t('event.noTravel')}</Empty>
           )}
         </>
       ) : null}

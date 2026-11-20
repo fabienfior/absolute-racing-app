@@ -8,6 +8,7 @@ import { Spacing } from '@/constants/theme';
 import { getDocuments } from '@/data/queries';
 import { useSession } from '@/lib/session';
 import { DOC_CATEGORIES, type DocCategory } from '@/lib/types';
+import { t } from '@/i18n';
 
 export default function DocumentsScreen() {
   const { profile } = useSession();
@@ -15,14 +16,14 @@ export default function DocumentsScreen() {
   const docs = getDocuments(profile).filter((d) => category === 'all' || d.category === category);
 
   return (
-    <Screen title="Documents" right={<AlertBell />}>
+    <Screen title={t('tab.documents')} right={<AlertBell />}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: Spacing.two }}>
-        <Chip label="All" active={category === 'all'} onPress={() => setCategory('all')} />
+        <Chip label={t('common.all')} active={category === 'all'} onPress={() => setCategory('all')} />
         {DOC_CATEGORIES.map((c) => (
-          <Chip key={c.id} label={c.label} active={category === c.id} onPress={() => setCategory(c.id)} />
+          <Chip key={c.id} label={t(`cat.${c.id}`)} active={category === c.id} onPress={() => setCategory(c.id)} />
         ))}
       </ScrollView>
-      {docs.length ? docs.map((d) => <DocumentRow key={d.id} doc={d} />) : <Empty>No documents in this category.</Empty>}
+      {docs.length ? docs.map((d) => <DocumentRow key={d.id} doc={d} />) : <Empty>{t('docs.empty')}</Empty>}
     </Screen>
   );
 }
