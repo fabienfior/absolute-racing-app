@@ -89,7 +89,7 @@ export function getChannels(role: Role) {
 }
 
 export function getMessages(channelId: string) {
-  return messages.filter((m) => m.channelId === channelId);
+  return messages.filter((m) => m.channelId === channelId).sort((a, b) => a.sentAt.localeCompare(b.sentAt));
 }
 
 /** Travel items for one person (everyone-items plus their own), or all items for management's "Everyone" view. */
@@ -104,3 +104,32 @@ export function getTravel(eventId: string, member: Member, everyone = false) {
 export const getChampionships = () => championships;
 export const getTeamResults = (eventId: string) => teamResults.filter((r) => r.eventId === eventId);
 export const getStandings = () => standings;
+
+/** Unread messages per channel for this person (messages by others after their last visit). */
+export function getUnreadByChannel(role: Role, readAt: Record<string, string>, myName: string) {
+  const out: Record<string, number> = {};
+  for (const c of getChannels(role)) {
+    const since = readAt[c.id] ?? '';
+    out[c.id] = messages.filter((m) => m.channelId === c.id && m.author !== myName && m.sentAt > since).length;
+  }
+  return out;
+}
+
+export function getUnreadMessages(role: Role, readAt: Record<string, string>, myName: string) {
+  return Object.values(getUnreadByChannel(role, readAt, myName)).reduce((a, b) => a + b, 0);
+}
+
+/** Every onboard and video link across the season, newest event first. */
+export function getMedia(kinds: string[] = ['onboard', 'video']) {
+  return [...events]
+    .sort((a, b) => b.startDate.localeCompare(a.startDate))
+    .flatMap((e) => e.links.filter((l) => kinds.includes(l.kind)).map((l) => ({ ...l, event: e })));
+}
+
+/** All our results across the season, newest first. */
+export function getAllTeamResults() {
+  return teamResults
+    .map((r) => ({ ...r, event: getEvent(r.eventId)! }))
+    .filter((r) => r.event)
+    .sort((a, b) => b.event.startDate.localeCompare(a.event.startDate));
+}

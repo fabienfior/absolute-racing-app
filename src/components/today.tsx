@@ -4,6 +4,7 @@ import { View } from 'react-native';
 
 import { AlertBell } from '@/components/alert-bell';
 import { DocumentRow } from '@/components/document-row';
+import { DriverMenu } from '@/components/driver-menu';
 import { ThemedText } from '@/components/themed-text';
 import { Button, Card, Empty, Icon, Pill, Row, Screen, SectionTitle } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
@@ -102,6 +103,8 @@ export function TodayScreen() {
           </Row>
         </Card>
       ) : null}
+
+      {profile.role === 'driver' ? <DriverMenu /> : null}
 
       {profile.role === 'management' ? (
         <Button label={t('title.sendAlert')} icon="megaphone-outline" onPress={() => router.push('/notify')} />

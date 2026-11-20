@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -15,7 +15,11 @@ import { t } from '@/i18n';
 
 export default function ChatScreen() {
   const { channelId } = useLocalSearchParams<{ channelId: string }>();
-  const { profile } = useSession();
+  const { profile, markChannelRead } = useSession();
+  // Opening the chat clears its unread count.
+  useEffect(() => {
+    markChannelRead(channelId);
+  }, [channelId, markChannelRead]);
   const theme = useTheme();
   const channel = channels.find((c) => c.id === channelId);
   // Local only for now; Supabase Realtime will replace this.

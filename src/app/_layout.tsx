@@ -60,6 +60,8 @@ export default function RootLayout() {
               <Stack.Screen name="alerts" options={{ title: t('title.alerts'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="notify" options={{ title: t('title.sendAlert'), presentation: 'modal' }} />
               <Stack.Screen name="travel/[eventId]" options={{ title: t('title.travel'), headerBackTitle: t('common.back') }} />
+              <Stack.Screen name="onboards" options={{ title: t('onboards.title'), headerBackTitle: t('common.back') }} />
+              <Stack.Screen name="results" options={{ title: t('results.title'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="standings" options={{ title: t('title.standings'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="guide" options={{ title: t('title.guide'), headerBackTitle: t('common.back') }} />
             </Stack>

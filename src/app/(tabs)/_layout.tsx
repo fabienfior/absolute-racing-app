@@ -4,6 +4,7 @@ import type { ColorValue } from 'react-native';
 
 import { FontFamily } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { getUnreadMessages } from '@/data/queries';
 import { useSession } from '@/lib/session';
 import { isTeam } from '@/lib/types';
 import { t } from '@/i18n';
@@ -16,7 +17,8 @@ const icon =
 
 export default function TabLayout() {
   const theme = useTheme();
-  const { profile, entered } = useSession();
+  const { profile, entered, channelReadAt } = useSession();
+  const unread = getUnreadMessages(profile.role, channelReadAt, profile.name);
   const team = isTeam(profile.role);
 
   if (!entered) return <Redirect href="/welcome" />;
@@ -28,7 +30,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: theme.tint,
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarStyle: { backgroundColor: theme.background, borderTopColor: theme.border },
-        tabBarLabelStyle: { fontFamily: FontFamily.semibold, fontSize: 11, lineHeight: 14 },
+        tabBarLabelStyle: { fontFamily: FontFamily.semibold, fontSize: 11, lineHeight: 17 },
       }}>
       <Tabs.Screen
         name="index"
@@ -41,7 +43,13 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="messages"
-        options={{ title: t('tab.messages'), tabBarIcon: icon('chatbubbles-outline'), href: team ? undefined : null }}
+        options={{
+          title: t('tab.messages'),
+          tabBarIcon: icon('chatbubbles-outline'),
+          href: team ? undefined : null,
+          tabBarBadge: unread || undefined,
+          tabBarBadgeStyle: { backgroundColor: theme.tint, color: '#0B0E14', fontFamily: FontFamily.bold },
+        }}
       />
       <Tabs.Screen name="profile" options={{ title: t('tab.more'), tabBarIcon: icon('person-circle-outline') }} />
     </Tabs>

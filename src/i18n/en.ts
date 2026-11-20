@@ -161,6 +161,18 @@ export const en = {
   'signin.demo': 'Demo: enter as',
   'signin.comingSoon': 'Sign-in links work once the app is connected to the database. Use the demo buttons below for now.',
   'more.signOut': 'Sign out',
+  'menu.onboards': 'Onboards',
+  'menu.results': 'Results',
+  'menu.messages': 'Messages',
+  'menu.documents': 'Documents',
+  'menu.new': '{count} new',
+  'onboards.title': 'Onboards & videos',
+  'onboards.onboard': 'Onboards',
+  'onboards.video': 'Highlights',
+  'onboards.empty': 'No videos yet.',
+  'results.title': 'Results',
+  'results.empty': 'No results yet this season.',
+  'results.official': 'Official results',
 };
 
 export type TranslationKey = keyof typeof en;

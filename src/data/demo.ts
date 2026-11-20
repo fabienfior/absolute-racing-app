@@ -94,6 +94,8 @@ export const events: RaceEvent[] = [
     links: [
       { label: 'Live timing', url: 'https://timingresult.com', kind: 'livetiming' },
       { label: 'Results', url: 'https://timingresult.com', kind: 'results' },
+      { label: 'Onboard – Free practice, Car #1', url: 'https://www.youtube.com', kind: 'onboard' },
+      { label: 'Onboard – Qualifying, Car #1', url: 'https://www.youtube.com', kind: 'onboard' },
     ],
   },
   {
@@ -210,6 +212,8 @@ export const channels: Channel[] = [
 export const messages: Message[] = [
   { id: 'm1', channelId: 'all-team', author: 'Alex Team Manager', body: 'Welcome to the team app!', sentAt: at(-3, 8) },
   { id: 'm2', channelId: 'drivers', author: 'Alex Team Manager', body: 'Debrief at 18:00 after practice.', sentAt: at(-1, 15) },
+  { id: 'm3', channelId: 'drivers', author: 'Chris Engineer', body: 'Car #1: tyre pressures for qualifying are in your run plan.', sentAt: at(0, 7, 50) },
+  { id: 'm4', channelId: 'all-team', author: 'Sam Coordinator', body: 'Shuttle leaves 06:30 tomorrow, not 07:00.', sentAt: at(-1, 20) },
 ];
 
 export const teamResults: TeamResult[] = [

@@ -22,6 +22,9 @@ type AppState = {
   markDocRead: (docId: string) => void;
   readAlertIds: Set<string>;
   markAlertRead: (alertId: string) => void;
+  /** When this person last opened each chat channel (ISO time). */
+  channelReadAt: Record<string, string>;
+  markChannelRead: (channelId: string) => void;
 };
 
 const AppContext = createContext<AppState | null>(null);
@@ -39,6 +42,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [alerts, setAlerts] = useState<Alert[]>(demoAlerts);
   const [docReads, setDocReads] = useState<Record<string, string[]>>(documentReads);
   const [readAlertIds, setReadAlertIds] = useState<Set<string>>(new Set(['a3']));
+
+  // Demo: the drivers' and team chats have messages newer than the last visit.
+  const [channelReadAt, setChannelReadAt] = useState<Record<string, string>>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    return { 'all-team': d.toISOString(), drivers: d.toISOString(), management: new Date().toISOString() };
+  });
+  const markChannelRead = useCallback(
+    (channelId: string) => setChannelReadAt((prev) => ({ ...prev, [channelId]: new Date().toISOString() })),
+    [],
+  );
 
   const profile = members.find((m) => m.id === DEMO_MEMBER[role])!;
 
@@ -66,8 +80,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ entered, enter, signOut, profile, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead }),
-    [entered, enter, signOut, profile, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead],
+    () => ({ entered, enter, signOut, profile, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead }),
+    [entered, enter, signOut, profile, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead],
   );
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
