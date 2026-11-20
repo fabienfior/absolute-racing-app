@@ -4,6 +4,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { HeaderActions } from '@/components/header-actions';
 import { ThemedText } from '@/components/themed-text';
 import { Brand, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -27,11 +28,14 @@ export function Screen({
   title,
   right,
   logo,
+  home,
 }: {
   children: ReactNode;
   title?: string;
   right?: ReactNode;
   logo?: boolean;
+  /** Home + notification icons in the top corner (main tab pages). */
+  home?: boolean;
 }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -47,6 +51,7 @@ export function Screen({
               <Logo />
             </View>
             {right}
+            {home ? <HeaderActions /> : null}
           </View>
         ) : null}
         {title ? (
@@ -54,7 +59,10 @@ export function Screen({
             <ThemedText type="subtitle" style={{ flex: 1 }}>
               {title}
             </ThemedText>
-            {logo ? null : right}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
+              {logo ? null : right}
+              {home && !logo ? <HeaderActions /> : null}
+            </View>
           </View>
         ) : null}
         {children}

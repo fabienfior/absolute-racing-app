@@ -1,14 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { Linking, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { DocumentRow } from '@/components/document-row';
 import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { TravelRow } from '@/components/travel-row';
 import { Button, Card, Empty, Icon, Row, Screen, SectionTitle } from '@/components/ui';
-import { getCar, getChampionship, getDocuments, getEvent, getMember, getMySessions, getTeamResults, getTravel } from '@/data/queries';
+import { getCar, getChampionship, getDocuments, getEvent, dmChannelId, getMember, getMySessions, getTeamResults, getTravel } from '@/data/queries';
 import { formatDateRange, formatDay, formatTime } from '@/lib/format';
+import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/lib/session';
 import { isTeam, type MediaLink } from '@/lib/types';
 import { useForecast, weatherLabel } from '@/lib/weather';
@@ -28,6 +29,7 @@ const linkIcon: Record<MediaLink['kind'], IconName> = {
 export default function EventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useSession();
+  const theme = useTheme();
   const event = getEvent(id);
   const forecast = useForecast(event?.latitude, event?.longitude);
 
@@ -188,8 +190,25 @@ export default function EventScreen() {
                             {c.duty}
                           </ThemedText>
                         </View>
+                        {m.id !== profile.id ? (
+                          <Pressable
+                            hitSlop={8}
+                            style={styles.action}
+                            accessibilityLabel={`${t('common.message')} ${m.name}`}
+                            onPress={() =>
+                              router.push({ pathname: '/chat/[channelId]', params: { channelId: dmChannelId(profile.id, m.id) } })
+                            }>
+                            <Icon name="chatbubble-ellipses-outline" size={20} color={theme.tint} />
+                          </Pressable>
+                        ) : null}
                         {canSeePhones && m.phone ? (
-                          <Icon name="call-outline" onPress={() => Linking.openURL(`tel:${m.phone}`)} accessibilityLabel={`${t('common.call')} ${m.name}`} />
+                          <Pressable
+                            hitSlop={8}
+                            style={styles.action}
+                            accessibilityLabel={`${t('common.call')} ${m.name}`}
+                            onPress={() => Linking.openURL(`tel:${m.phone}`)}>
+                            <Icon name="call-outline" size={20} color={theme.tint} />
+                          </Pressable>
                         ) : null}
                       </Row>
                     );
@@ -225,3 +244,7 @@ export default function EventScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  action: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#262D3D', borderRadius: 2 },
+});

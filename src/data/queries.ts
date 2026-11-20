@@ -1,5 +1,5 @@
 import { cars, championships, channels, documents, events, guide, members, messages, news, standings, teamResults } from '@/data/demo';
-import { isForMember, isTeam, type Alert, type Member, type Role, type Target } from '@/lib/types';
+import { isForMember, isTeam, type Alert, type Channel, type Member, type Message, type Role, type Target } from '@/lib/types';
 import { t } from '@/i18n';
 
 /**
@@ -84,12 +84,23 @@ export function getGuide() {
   return guide;
 }
 
-export function getChannels(role: Role) {
-  return channels.filter((c) => c.roles.includes(role));
+/** Private chat between two people: one channel id per pair. */
+export const dmChannelId = (a: string, b: string) => `dm:${[a, b].sort().join(':')}`;
+export const dmOther = (channelId: string, myId: string) =>
+  channelId.startsWith('dm:') ? getMember(channelId.slice(3).split(':').find((id) => id !== myId) ?? '') : undefined;
+
+/** Group channels for this role, plus private chats this person has messages in. */
+export function getChannels(role: Role, list: Message[] = messages, myId = ''): Channel[] {
+  const groups = channels.filter((c) => c.roles.includes(role));
+  const dms = [...new Set(list.filter((m) => m.channelId.startsWith('dm:') && m.channelId.includes(myId)).map((m) => m.channelId))];
+  return [
+    ...groups,
+    ...dms.map((id) => ({ id, name: dmOther(id, myId)?.name ?? '', roles: [] as Role[] })),
+  ];
 }
 
-export function getMessages(channelId: string) {
-  return messages.filter((m) => m.channelId === channelId).sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+export function getMessages(channelId: string, list: Message[] = messages) {
+  return list.filter((m) => m.channelId === channelId).sort((a, b) => a.sentAt.localeCompare(b.sentAt));
 }
 
 /** Travel items for one person (everyone-items plus their own), or all items for management's "Everyone" view. */
@@ -106,17 +117,17 @@ export const getTeamResults = (eventId: string) => teamResults.filter((r) => r.e
 export const getStandings = () => standings;
 
 /** Unread messages per channel for this person (messages by others after their last visit). */
-export function getUnreadByChannel(role: Role, readAt: Record<string, string>, myName: string) {
+export function getUnreadByChannel(list: Message[], member: Member, readAt: Record<string, string>) {
   const out: Record<string, number> = {};
-  for (const c of getChannels(role)) {
+  for (const c of getChannels(member.role, list, member.id)) {
     const since = readAt[c.id] ?? '';
-    out[c.id] = messages.filter((m) => m.channelId === c.id && m.author !== myName && m.sentAt > since).length;
+    out[c.id] = list.filter((m) => m.channelId === c.id && m.author !== member.name && m.sentAt > since).length;
   }
   return out;
 }
 
-export function getUnreadMessages(role: Role, readAt: Record<string, string>, myName: string) {
-  return Object.values(getUnreadByChannel(role, readAt, myName)).reduce((a, b) => a + b, 0);
+export function getUnreadMessages(list: Message[], member: Member, readAt: Record<string, string>) {
+  return Object.values(getUnreadByChannel(list, member, readAt)).reduce((a, b) => a + b, 0);
 }
 
 /** Every onboard and video link across the season, newest event first. */

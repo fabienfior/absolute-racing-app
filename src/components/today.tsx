@@ -2,7 +2,6 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
-import { AlertBell } from '@/components/alert-bell';
 import { DocumentRow } from '@/components/document-row';
 import { DriverMenu } from '@/components/driver-menu';
 import { ThemedText } from '@/components/themed-text';
@@ -46,7 +45,7 @@ export function TodayScreen() {
   const firstName = profile.name.split(' ')[0];
 
   return (
-    <Screen logo right={<AlertBell />}>
+    <Screen logo home>
       <ThemedText type="subtitle">{t('today.hi', { name: firstName })}</ThemedText>
       <Row>
         <Pill label={profile.jobTitle} muted />

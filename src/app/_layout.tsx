@@ -10,7 +10,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 
-import { HomeButton } from '@/components/home-button';
+import { HeaderActions } from '@/components/header-actions';
 import { Colors, FontFamily } from '@/constants/theme';
 import { LanguageProvider } from '@/i18n';
 import { SessionProvider } from '@/lib/session';
@@ -54,7 +54,7 @@ export default function RootLayout() {
             <Stack key={language} screenOptions={{
                 headerTitleStyle: { fontFamily: FontFamily.bold },
                 headerTintColor: c.text,
-                headerRight: () => <HomeButton />,
+                headerRight: () => <HeaderActions />,
               }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="welcome" options={{ headerShown: false, animation: 'fade' }} />

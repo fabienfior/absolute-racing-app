@@ -150,4 +150,6 @@ export const ja: Record<TranslationKey, string> = {
   'results.title': '結果',
   'results.empty': '今シーズンの結果はまだありません。',
   'results.official': '公式結果',
+  'messages.start': '{name}さんにメッセージを送る',
+  'common.message': 'メッセージ',
 };

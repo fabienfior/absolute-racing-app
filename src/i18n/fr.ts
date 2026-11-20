@@ -150,4 +150,6 @@ export const fr: Record<TranslationKey, string> = {
   'results.title': 'Résultats',
   'results.empty': 'Aucun résultat cette saison.',
   'results.official': 'Résultats officiels',
+  'messages.start': 'Envoyez un message à {name}',
+  'common.message': 'Message',
 };

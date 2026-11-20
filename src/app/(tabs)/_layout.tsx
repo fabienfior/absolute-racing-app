@@ -17,8 +17,8 @@ const icon =
 
 export default function TabLayout() {
   const theme = useTheme();
-  const { profile, entered, channelReadAt } = useSession();
-  const unread = getUnreadMessages(profile.role, channelReadAt, profile.name);
+  const { profile, entered, channelReadAt, messages } = useSession();
+  const unread = getUnreadMessages(messages, profile, channelReadAt);
   const team = isTeam(profile.role);
 
   if (!entered) return <Redirect href="/welcome" />;

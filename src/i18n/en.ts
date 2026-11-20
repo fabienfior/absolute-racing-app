@@ -173,6 +173,8 @@ export const en = {
   'results.title': 'Results',
   'results.empty': 'No results yet this season.',
   'results.official': 'Official results',
+  'messages.start': 'Send {name} a message',
+  'common.message': 'Message',
 };
 
 export type TranslationKey = keyof typeof en;

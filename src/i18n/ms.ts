@@ -150,4 +150,6 @@ export const ms: Record<TranslationKey, string> = {
   'results.title': 'Keputusan',
   'results.empty': 'Belum ada keputusan musim ini.',
   'results.official': 'Keputusan rasmi',
+  'messages.start': 'Hantar mesej kepada {name}',
+  'common.message': 'Mesej',
 };

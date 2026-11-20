@@ -150,4 +150,6 @@ export const th: Record<TranslationKey, string> = {
   'results.title': 'ผลการแข่ง',
   'results.empty': 'ฤดูกาลนี้ยังไม่มีผลการแข่ง',
   'results.official': 'ผลการแข่งอย่างเป็นทางการ',
+  'messages.start': 'ส่งข้อความถึง {name}',
+  'common.message': 'ข้อความ',
 };

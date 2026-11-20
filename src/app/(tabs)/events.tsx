@@ -16,7 +16,7 @@ export default function EventsScreen() {
   const past = getPastEvents().filter(keep);
 
   return (
-    <Screen
+    <Screen home
       title={t('season.title')}
       right={
         <ThemedText type="linkPrimary" onPress={() => router.push('/standings')}>

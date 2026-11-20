@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import { alerts as demoAlerts, documentReads, members } from '@/data/demo';
+import { alerts as demoAlerts, documentReads, members, messages as demoMessages } from '@/data/demo';
 
-import type { Alert, Member, Role, Target } from './types';
+import type { Alert, Member, Message, Role, Target } from './types';
 
 /**
  * Demo app state. Once Supabase is connected, the profile comes from the signed-in
@@ -25,6 +25,8 @@ type AppState = {
   /** When this person last opened each chat channel (ISO time). */
   channelReadAt: Record<string, string>;
   markChannelRead: (channelId: string) => void;
+  messages: Message[];
+  sendMessage: (channelId: string, body: string) => void;
 };
 
 const AppContext = createContext<AppState | null>(null);
@@ -56,6 +58,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const profile = members.find((m) => m.id === DEMO_MEMBER[role])!;
 
+  // Local for now; Supabase Realtime replaces this so messages reach the other phone instantly.
+  const [messages, setMessages] = useState<Message[]>(demoMessages);
+  const sendMessage = useCallback(
+    (channelId: string, body: string) =>
+      setMessages((prev) => [
+        ...prev,
+        { id: `m${Date.now()}`, channelId, author: profile.name, body, sentAt: new Date().toISOString() },
+      ]),
+    [profile.name],
+  );
+
   const sendAlert = useCallback<AppState['sendAlert']>(
     (input) =>
       setAlerts((prev) => [
@@ -80,8 +93,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ entered, enter, signOut, profile, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead }),
-    [entered, enter, signOut, profile, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead],
+    () => ({ entered, enter, signOut, profile, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage }),
+    [entered, enter, signOut, profile, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage],
   );
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

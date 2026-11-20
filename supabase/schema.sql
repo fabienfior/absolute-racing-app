@@ -224,7 +224,8 @@ create table public.channels (
 
 create table public.messages (
   id uuid primary key default gen_random_uuid(),
-  channel_id uuid not null references public.channels on delete cascade,
+  channel_id uuid references public.channels on delete cascade, -- group chat
+  recipient_id uuid references public.profiles on delete cascade, -- or private chat
   author_id uuid not null references public.profiles default auth.uid(),
   body text not null,
   sent_at timestamptz not null default now()
@@ -305,8 +306,16 @@ create policy "manage news" on public.news_posts for all using (public.is_manage
 create policy "read channels" on public.channels for select using (public.my_role() = any (roles));
 create policy "manage channels" on public.channels for all using (public.is_management()) with check (public.is_management());
 create policy "read messages" on public.messages for select
-  using (exists (select 1 from public.channels c where c.id = channel_id and public.my_role() = any (c.roles)));
+  using (
+    exists (select 1 from public.channels c where c.id = channel_id and public.my_role() = any (c.roles))
+    or (channel_id is null and auth.uid() in (author_id, recipient_id))
+  );
 create policy "post messages" on public.messages for insert
-  with check (author_id = auth.uid() and exists (select 1 from public.channels c where c.id = channel_id and public.my_role() = any (c.roles)));
+  with check (
+    author_id = auth.uid() and (
+      exists (select 1 from public.channels c where c.id = channel_id and public.my_role() = any (c.roles))
+      or (channel_id is null and recipient_id is not null and public.is_team())
+    )
+  );
 
 alter publication supabase_realtime add table public.messages, public.alerts, public.documents;

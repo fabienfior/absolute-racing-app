@@ -44,8 +44,8 @@ function Tile({
 
 /** Quick-access menu for drivers: onboards, results, messages (with unread count) and documents. */
 export function DriverMenu() {
-  const { profile, channelReadAt, docReads } = useSession();
-  const unreadMessages = getUnreadMessages(profile.role, channelReadAt, profile.name);
+  const { profile, channelReadAt, docReads, messages } = useSession();
+  const unreadMessages = getUnreadMessages(messages, profile, channelReadAt);
   const unreadDocs = getDocuments(profile).filter((d) => !(docReads[d.id] ?? []).includes(profile.id)).length;
 
   return (

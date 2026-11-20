@@ -19,7 +19,7 @@ export default function ProfileScreen() {
   const { language, setLanguage } = useLanguage();
 
   return (
-    <Screen title={t('more.title')}>
+    <Screen home title={t('more.title')}>
       <Card>
         <Row>
           <Icon name="person-circle" size={48} />

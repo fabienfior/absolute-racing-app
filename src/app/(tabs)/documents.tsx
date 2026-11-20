@@ -1,7 +1,6 @@
 import { ScrollView } from 'react-native';
 import { useState } from 'react';
 
-import { AlertBell } from '@/components/alert-bell';
 import { DocumentRow } from '@/components/document-row';
 import { Chip, Empty, Screen } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
@@ -16,7 +15,7 @@ export default function DocumentsScreen() {
   const docs = getDocuments(profile).filter((d) => category === 'all' || d.category === category);
 
   return (
-    <Screen title={t('tab.documents')} right={<AlertBell />}>
+    <Screen home title={t('tab.documents')}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: Spacing.two }}>
         <Chip label={t('common.all')} active={category === 'all'} onPress={() => setCategory('all')} />
         {DOC_CATEGORIES.map((c) => (

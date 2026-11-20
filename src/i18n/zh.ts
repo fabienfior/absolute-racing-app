@@ -150,4 +150,6 @@ export const zh: Record<TranslationKey, string> = {
   'results.title': '成绩',
   'results.empty': '本赛季暂无成绩。',
   'results.official': '官方成绩',
+  'messages.start': '给 {name} 发消息',
+  'common.message': '发消息',
 };
