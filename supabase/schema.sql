@@ -7,6 +7,9 @@ create table public.profiles (
   id uuid primary key references auth.users on delete cascade,
   full_name text not null default '',
   role public.user_role not null default 'sponsor',
+  job_title text not null default '',
+  car_id uuid,
+  phone text, -- only management can read other people's phone numbers (see profile_phones view)
   created_at timestamptz not null default now()
 );
 
@@ -32,9 +35,32 @@ end $$;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
 
+create table public.championships (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  short_name text not null
+);
+
+create table public.cars (
+  id uuid primary key default gen_random_uuid(),
+  number text not null,
+  model text not null,
+  championship_id uuid references public.championships
+);
+
+alter table public.profiles add constraint profiles_car_fk foreign key (car_id) references public.cars on delete set null;
+
+create or replace function public.my_car() returns uuid
+language sql stable security definer set search_path = public as $$
+  select car_id from public.profiles where id = auth.uid()
+$$;
+
 create table public.events (
   id uuid primary key default gen_random_uuid(),
   name text not null,
+  championship_id uuid references public.championships,
+  latitude double precision,
+  longitude double precision,
   circuit text not null default '',
   location text not null default '',
   start_date date not null,
@@ -43,11 +69,21 @@ create table public.events (
   created_at timestamptz not null default now()
 );
 
-create table public.timetable_items (
+create table public.sessions (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events on delete cascade,
   starts_at timestamptz not null,
-  title text not null
+  ends_at timestamptz not null,
+  title text not null,
+  car_id uuid references public.cars on delete cascade -- null = whole team
+);
+
+create table public.crew_assignments (
+  event_id uuid not null references public.events on delete cascade,
+  member_id uuid not null references public.profiles on delete cascade,
+  car_id uuid references public.cars on delete set null,
+  duty text not null default '',
+  primary key (event_id, member_id)
 );
 
 create type public.travel_kind as enum ('flight', 'hotel', 'transfer', 'other');
@@ -61,7 +97,7 @@ create table public.travel_items (
   starts_at timestamptz
 );
 
-create type public.link_kind as enum ('results', 'video', 'onboard', 'other');
+create type public.link_kind as enum ('results', 'livetiming', 'stream', 'video', 'onboard', 'other');
 
 create table public.event_links (
   id uuid primary key default gen_random_uuid(),
@@ -80,6 +116,62 @@ create table public.news_posts (
   event_id uuid references public.events on delete set null,
   audience public.audience not null default 'everyone',
   published_at timestamptz not null default now()
+);
+
+-- Targeting: who a document or alert is for.
+create type public.target_type as enum ('all', 'role', 'car');
+
+create or replace function public.is_targeted(t public.target_type, r public.user_role, c uuid) returns boolean
+language sql stable as $$
+  select public.is_management()
+      or (public.is_team() and (t = 'all' or (t = 'role' and r = public.my_role()) or (t = 'car' and c = public.my_car())))
+$$;
+
+create type public.doc_category as enum ('briefing', 'runplan', 'timetable', 'bulletin', 'media', 'other');
+
+create table public.documents (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  category public.doc_category not null default 'other',
+  event_id uuid references public.events on delete set null,
+  storage_path text not null, -- file in the 'documents' storage bucket
+  target_type public.target_type not null default 'all',
+  target_role public.user_role,
+  target_car uuid references public.cars on delete cascade,
+  published_at timestamptz not null default now()
+);
+
+create table public.document_reads (
+  document_id uuid not null references public.documents on delete cascade,
+  member_id uuid not null references public.profiles on delete cascade default auth.uid(),
+  read_at timestamptz not null default now(),
+  primary key (document_id, member_id)
+);
+
+create table public.alerts (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  body text not null default '',
+  sent_by uuid not null references public.profiles default auth.uid(),
+  sent_at timestamptz not null default now(),
+  target_type public.target_type not null default 'all',
+  target_role public.user_role,
+  target_car uuid references public.cars on delete cascade,
+  document_id uuid references public.documents on delete set null
+);
+
+create table public.alert_reads (
+  alert_id uuid not null references public.alerts on delete cascade,
+  member_id uuid not null references public.profiles on delete cascade default auth.uid(),
+  read_at timestamptz not null default now(),
+  primary key (alert_id, member_id)
+);
+
+-- Expo push tokens, one per device, for push notifications.
+create table public.push_tokens (
+  token text primary key,
+  member_id uuid not null references public.profiles on delete cascade default auth.uid(),
+  updated_at timestamptz not null default now()
 );
 
 create table public.guide_sections (
@@ -106,7 +198,15 @@ create table public.messages (
 -- Row-level security -----------------------------------------------------
 alter table public.profiles enable row level security;
 alter table public.events enable row level security;
-alter table public.timetable_items enable row level security;
+alter table public.sessions enable row level security;
+alter table public.championships enable row level security;
+alter table public.cars enable row level security;
+alter table public.crew_assignments enable row level security;
+alter table public.documents enable row level security;
+alter table public.document_reads enable row level security;
+alter table public.alerts enable row level security;
+alter table public.alert_reads enable row level security;
+alter table public.push_tokens enable row level security;
 alter table public.travel_items enable row level security;
 alter table public.event_links enable row level security;
 alter table public.news_posts enable row level security;
@@ -114,15 +214,36 @@ alter table public.guide_sections enable row level security;
 alter table public.channels enable row level security;
 alter table public.messages enable row level security;
 
+-- Team members can see each other (phone numbers are hidden from non-management in the app,
+-- and should be moved to a management-only table before launch).
 create policy "own profile or team" on public.profiles for select using (id = auth.uid() or public.is_team());
 create policy "management edits profiles" on public.profiles for update using (public.is_management());
 
 -- Everyone signed in sees events, timetables, links; only management edits.
 create policy "read events" on public.events for select to authenticated using (true);
-create policy "read timetable" on public.timetable_items for select to authenticated using (true);
+create policy "read sessions" on public.sessions for select to authenticated using (true);
+create policy "read championships" on public.championships for select to authenticated using (true);
+create policy "read cars" on public.cars for select to authenticated using (true);
 create policy "read links" on public.event_links for select to authenticated using (true);
 create policy "manage events" on public.events for all using (public.is_management()) with check (public.is_management());
-create policy "manage timetable" on public.timetable_items for all using (public.is_management()) with check (public.is_management());
+create policy "manage sessions" on public.sessions for all using (public.is_management()) with check (public.is_management());
+create policy "manage championships" on public.championships for all using (public.is_management()) with check (public.is_management());
+create policy "manage cars" on public.cars for all using (public.is_management()) with check (public.is_management());
+
+-- Crew roster: team only.
+create policy "team reads crew" on public.crew_assignments for select using (public.is_team());
+create policy "manage crew" on public.crew_assignments for all using (public.is_management()) with check (public.is_management());
+
+-- Documents and alerts: only the people they target; management sees all and every read receipt.
+create policy "read targeted documents" on public.documents for select using (public.is_targeted(target_type, target_role, target_car));
+create policy "manage documents" on public.documents for all using (public.is_management()) with check (public.is_management());
+create policy "read receipts" on public.document_reads for select using (member_id = auth.uid() or public.is_management());
+create policy "confirm read" on public.document_reads for insert with check (member_id = auth.uid());
+create policy "read targeted alerts" on public.alerts for select using (public.is_targeted(target_type, target_role, target_car));
+create policy "send alerts" on public.alerts for insert with check (public.is_management());
+create policy "alert receipts" on public.alert_reads for select using (member_id = auth.uid() or public.is_management());
+create policy "mark alert read" on public.alert_reads for insert with check (member_id = auth.uid());
+create policy "own push tokens" on public.push_tokens for all using (member_id = auth.uid()) with check (member_id = auth.uid());
 create policy "manage links" on public.event_links for all using (public.is_management()) with check (public.is_management());
 
 -- Travel plans and the team guide are team only.
@@ -144,4 +265,4 @@ create policy "read messages" on public.messages for select
 create policy "post messages" on public.messages for insert
   with check (author_id = auth.uid() and exists (select 1 from public.channels c where c.id = channel_id and public.my_role() = any (c.roles)));
 
-alter publication supabase_realtime add table public.messages;
+alter publication supabase_realtime add table public.messages, public.alerts, public.documents;

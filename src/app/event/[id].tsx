@@ -1,23 +1,29 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { View } from 'react-native';
+import { Linking, View } from 'react-native';
 
+import { DocumentRow } from '@/components/document-row';
 import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
-import { Card, Empty, Icon, Screen, SectionTitle } from '@/components/ui';
-import { getEvent } from '@/data/queries';
-import { formatDateRange } from '@/lib/format';
+import { Card, Empty, Icon, Row, Screen, SectionTitle } from '@/components/ui';
+import { getCar, getChampionship, getDocuments, getEvent, getMember, getMySessions } from '@/data/queries';
+import { formatDateRange, formatDay, formatTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import { isTeam, type MediaLink, type TravelItem } from '@/lib/types';
 
-const travelIcon: Record<TravelItem['kind'], 'airplane-outline' | 'bed-outline' | 'car-outline' | 'ellipse-outline'> = {
+type IconName = keyof typeof Ionicons.glyphMap;
+
+const travelIcon: Record<TravelItem['kind'], IconName> = {
   flight: 'airplane-outline',
   hotel: 'bed-outline',
   transfer: 'car-outline',
   other: 'ellipse-outline',
 };
 
-const linkIcon: Record<MediaLink['kind'], 'stats-chart-outline' | 'play-circle-outline' | 'videocam-outline' | 'link-outline'> = {
-  results: 'stats-chart-outline',
+const linkIcon: Record<MediaLink['kind'], IconName> = {
+  results: 'trophy-outline',
+  livetiming: 'stopwatch-outline',
+  stream: 'tv-outline',
   video: 'play-circle-outline',
   onboard: 'videocam-outline',
   other: 'link-outline',
@@ -37,15 +43,24 @@ export default function EventScreen() {
   }
 
   const team = isTeam(profile.role);
-  const days = [...new Set(event.timetable.map((t) => t.day))];
+  const sessions = getMySessions(event.id, team ? profile : { ...profile, role: 'driver', carId: undefined });
+  const days = [...new Set(sessions.map((s) => formatDay(s.startsAt)))];
+  const docs = team ? getDocuments(profile).filter((d) => d.eventId === event.id) : [];
+  const crewByCar = new Map<string, typeof event.crew>();
+  for (const c of event.crew) {
+    const key = c.carId ?? '';
+    crewByCar.set(key, [...(crewByCar.get(key) ?? []), c]);
+  }
+  const canSeePhones = profile.role === 'management';
 
   return (
     <Screen>
       <Stack.Screen options={{ title: event.name }} />
       <Card>
-        <ThemedText type="default" style={{ fontWeight: 700, fontSize: 20 }}>
-          {event.name}
+        <ThemedText type="small" themeColor="textSecondary">
+          {getChampionship(event.championshipId)?.name}
         </ThemedText>
+        <ThemedText style={{ fontWeight: 700, fontSize: 20 }}>{event.name}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           {event.circuit} · {event.location}
         </ThemedText>
@@ -55,12 +70,19 @@ export default function EventScreen() {
         <ThemedText type="small" style={{ marginTop: 8 }}>
           {event.summary}
         </ThemedText>
+        <ThemedText
+          type="linkPrimary"
+          onPress={() =>
+            Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`)
+          }>
+          Open circuit in Maps
+        </ThemedText>
       </Card>
 
-      <SectionTitle>Results, videos and onboard</SectionTitle>
+      <SectionTitle>Live timing, results and videos</SectionTitle>
       {event.links.length ? (
         event.links.map((l) => (
-          <ExternalLink key={l.url + l.label} href={l.url as `https://${string}`} asChild>
+          <ExternalLink key={l.kind + l.label} href={l.url as `https://${string}`} asChild>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Icon name={linkIcon[l.kind]} size={22} />
               <ThemedText style={{ fontWeight: 600 }}>{l.label}</ThemedText>
@@ -68,33 +90,74 @@ export default function EventScreen() {
           </ExternalLink>
         ))
       ) : (
-        <Empty>Links will appear here after the event.</Empty>
+        <Empty>Links will appear here closer to the event.</Empty>
       )}
 
-      <SectionTitle>Timetable</SectionTitle>
+      <SectionTitle>Schedule</SectionTitle>
       {days.length ? (
         days.map((day) => (
-          <Card key={day}>
+          <Card key={day} style={{ gap: 6 }}>
             <ThemedText type="smallBold">{day}</ThemedText>
-            {event.timetable
-              .filter((t) => t.day === day)
-              .map((t) => (
-                <View key={t.time + t.title} style={{ flexDirection: 'row', gap: 12 }}>
-                  <ThemedText type="small" themeColor="textSecondary" style={{ width: 48 }}>
-                    {t.time}
+            {sessions
+              .filter((s) => formatDay(s.startsAt) === day)
+              .map((s) => (
+                <Row key={s.id} style={{ alignItems: 'flex-start' }}>
+                  <ThemedText type="small" themeColor="textSecondary" style={{ width: 50 }}>
+                    {formatTime(s.startsAt)}
                   </ThemedText>
-                  <ThemedText type="small">{t.title}</ThemedText>
-                </View>
+                  <ThemedText type="small" style={{ flex: 1 }}>
+                    {s.title}
+                    {s.carId ? ` (Car ${getCar(s.carId)?.number})` : ''}
+                  </ThemedText>
+                </Row>
               ))}
           </Card>
         ))
       ) : (
-        <Empty>Timetable not published yet.</Empty>
+        <Empty>Schedule not published yet.</Empty>
       )}
 
       {team ? (
         <>
-          <SectionTitle>Travel plan (team only)</SectionTitle>
+          <SectionTitle>Crew and cars</SectionTitle>
+          {event.crew.length ? (
+            [...crewByCar.entries()].map(([carId, crew]) => {
+              const car = getCar(carId);
+              return (
+                <Card key={carId || 'team'} style={{ gap: 8 }}>
+                  <ThemedText type="smallBold">{car ? `Car ${car.number} · ${car.model}` : 'Team'}</ThemedText>
+                  {crew.map((c) => {
+                    const m = getMember(c.memberId);
+                    if (!m) return null;
+                    return (
+                      <Row key={c.memberId}>
+                        <Icon name="person-circle-outline" size={26} />
+                        <View style={{ flex: 1 }}>
+                          <ThemedText type="small" style={{ fontWeight: 600 }}>
+                            {m.name}
+                            {m.id === profile.id ? ' (you)' : ''}
+                          </ThemedText>
+                          <ThemedText type="small" themeColor="textSecondary">
+                            {c.duty}
+                          </ThemedText>
+                        </View>
+                        {canSeePhones && m.phone ? (
+                          <Icon name="call-outline" onPress={() => Linking.openURL(`tel:${m.phone}`)} accessibilityLabel={`Call ${m.name}`} />
+                        ) : null}
+                      </Row>
+                    );
+                  })}
+                </Card>
+              );
+            })
+          ) : (
+            <Empty>Crew list coming soon.</Empty>
+          )}
+
+          <SectionTitle>Documents</SectionTitle>
+          {docs.length ? docs.map((d) => <DocumentRow key={d.id} doc={d} />) : <Empty>No documents for this event yet.</Empty>}
+
+          <SectionTitle>Travel plan</SectionTitle>
           {event.travel.length ? (
             event.travel.map((t) => (
               <Card key={t.title} style={{ flexDirection: 'row', gap: 12 }}>

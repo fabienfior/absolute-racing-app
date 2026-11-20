@@ -25,17 +25,20 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarStyle: { backgroundColor: theme.background, borderTopColor: theme.border },
       }}>
-      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: icon('home-outline') }} />
+      <Tabs.Screen
+        name="index"
+        options={{ title: team ? 'Today' : 'Home', tabBarIcon: icon(team ? 'speedometer-outline' : 'home-outline') }}
+      />
       <Tabs.Screen name="events" options={{ title: 'Events', tabBarIcon: icon('flag-outline') }} />
+      <Tabs.Screen
+        name="documents"
+        options={{ title: 'Documents', tabBarIcon: icon('folder-open-outline'), href: team ? undefined : null }}
+      />
       <Tabs.Screen
         name="messages"
         options={{ title: 'Messages', tabBarIcon: icon('chatbubbles-outline'), href: team ? undefined : null }}
       />
-      <Tabs.Screen
-        name="guide"
-        options={{ title: 'Team guide', tabBarIcon: icon('book-outline'), href: team ? undefined : null }}
-      />
-      <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: icon('person-circle-outline') }} />
+      <Tabs.Screen name="profile" options={{ title: 'More', tabBarIcon: icon('person-circle-outline') }} />
     </Tabs>
   );
 }

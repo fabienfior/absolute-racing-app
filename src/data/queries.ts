@@ -1,28 +1,82 @@
-import { channels, events, guide, messages, news } from '@/data/demo';
-import { isTeam, type Role } from '@/lib/types';
+import { cars, championships, channels, documents, events, guide, members, messages, news } from '@/data/demo';
+import { isForMember, isTeam, type Alert, type Member, type Role, type Target } from '@/lib/types';
 
 /**
  * Data access in one place. Each function maps to a Supabase query later;
- * row-level security in supabase/schema.sql enforces the same role rules server-side.
+ * row-level security in supabase/schema.sql enforces the same rules server-side.
  */
-const today = () => new Date().toISOString().slice(0, 10);
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 export function getUpcomingEvents() {
-  return events.filter((e) => e.endDate >= today()).sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const t = todayStr();
+  return events.filter((e) => e.endDate >= t).sort((a, b) => a.startDate.localeCompare(b.startDate));
 }
 
 export function getPastEvents() {
-  return events.filter((e) => e.endDate < today()).sort((a, b) => b.startDate.localeCompare(a.startDate));
+  const t = todayStr();
+  return events.filter((e) => e.endDate < t).sort((a, b) => b.startDate.localeCompare(a.startDate));
+}
+
+/** The event happening now, or the next one. */
+export function getCurrentOrNextEvent() {
+  return getUpcomingEvents()[0];
 }
 
 export function getEvent(id: string) {
   return events.find((e) => e.id === id);
 }
 
+export const getChampionship = (id: string) => championships.find((c) => c.id === id);
+export const getCar = (id?: string) => cars.find((c) => c.id === id);
+export const getMember = (id: string) => members.find((m) => m.id === id);
+export const getCars = () => cars;
+
+/** Sessions this member should see: whole-team sessions plus their own car's. */
+export function getMySessions(eventId: string, member: Member) {
+  const event = getEvent(eventId);
+  if (!event) return [];
+  return event.sessions
+    .filter((s) => !s.carId || member.role === 'management' || s.carId === member.carId)
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+}
+
 export function getNews(role: Role) {
   return news
     .filter((n) => n.audience === 'everyone' || isTeam(role))
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+export function getDocuments(member: Member) {
+  return documents
+    .filter((d) => isForMember(d.target, member))
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+export const getDocument = (id: string) => documents.find((d) => d.id === id);
+
+/** Team members a target reaches (for read-receipt counts). */
+export function getAudience(target: Target) {
+  return members.filter(
+    (m) =>
+      isTeam(m.role) &&
+      (target.type === 'all' ||
+        (target.type === 'role' && m.role === target.role) ||
+        (target.type === 'car' && m.carId === target.carId)),
+  );
+}
+
+export function describeTarget(target: Target) {
+  if (target.type === 'all') return 'Whole team';
+  if (target.type === 'role') return target.role === 'driver' ? 'Drivers' : 'Management';
+  const car = getCar(target.carId);
+  return car ? `Car ${car.number}` : 'One car';
+}
+
+export function getMyAlerts(alerts: Alert[], member: Member) {
+  return alerts.filter((a) => isForMember(a.target, member));
 }
 
 export function getGuide() {

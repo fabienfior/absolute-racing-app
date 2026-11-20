@@ -8,12 +8,17 @@ Built with Expo (React Native + TypeScript) and Supabase.
 | | Management | Drivers | Sponsors |
 |---|---|---|---|
 | News and event calendar | ✓ | ✓ | ✓ |
-| Results, videos, onboard links | ✓ | ✓ | ✓ |
-| Event timetable | ✓ | ✓ | ✓ |
-| Travel plans | ✓ | ✓ | |
-| Team guide | ✓ | ✓ | |
-| Messaging | ✓ | ✓ | |
-| Create and edit content | ✓ | | |
+| Live timing, results, videos, onboard links | ✓ | ✓ | ✓ |
+| Event schedule | ✓ | ✓ (plus own car's sessions) | ✓ |
+| Today dashboard (countdown, weather, today's schedule) | ✓ | ✓ | |
+| Documents (briefings, run plans, bulletins…) | all | ones aimed at them or their car | |
+| Alerts | send + see all | ones aimed at them or their car | |
+| Read receipts | ✓ | | |
+| Crew roster and travel plans | ✓ | ✓ | |
+| Team guide and messaging | ✓ | ✓ | |
+| Crew phone numbers | ✓ | | |
+
+Documents and alerts can target the whole team, one role, or one car.
 
 ## Run it
 
@@ -35,8 +40,9 @@ Use the Profile tab to preview it as management, a driver or a sponsor.
 
 ## Layout
 
-- `src/app/(tabs)/` – Home, Events, Messages, Team guide, Profile
-- `src/app/event/[id].tsx` – event page (links, timetable, travel)
+- `src/app/(tabs)/` – Today (sponsors: Home), Events, Documents, Messages, More
+- `src/app/document/[id].tsx`, `alerts.tsx`, `notify.tsx` – document viewer with read receipts, alert inbox, send-an-alert
+- `src/app/event/[id].tsx` – event page (links, schedule, crew, documents, travel)
 - `src/app/chat/[channelId].tsx` – chat
 - `src/data/queries.ts` – all data access (swap demo data for Supabase here)
 - `supabase/schema.sql` – tables and role-based access rules
@@ -44,6 +50,8 @@ Use the Profile tab to preview it as management, a driver or a sponsor.
 ## Still to do
 
 - Sign-in screen and Supabase-backed queries
-- Management editing screens (events, travel, news, guide)
-- Push notifications for news and messages
+- Management editing screens (events, travel, crew, documents, news, guide)
+- Push notifications for alerts, documents and messages
+- Full travel itinerary (flights, trains, rental cars, hotels, restaurants)
+- Multiple languages
 - Official logo, icon and team colours (currently placeholders)

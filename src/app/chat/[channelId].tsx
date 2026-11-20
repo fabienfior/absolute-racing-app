@@ -26,7 +26,7 @@ export default function ChatScreen() {
     if (!body) return;
     setItems((prev) => [
       ...prev,
-      { id: String(Date.now()), channelId, author: profile.fullName, body, sentAt: new Date().toISOString() },
+      { id: String(Date.now()), channelId, author: profile.name, body, sentAt: new Date().toISOString() },
     ]);
     setText('');
   };

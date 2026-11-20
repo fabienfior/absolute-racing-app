@@ -4,7 +4,7 @@ import { getGuide } from '@/data/queries';
 
 export default function GuideScreen() {
   return (
-    <Screen title="Team guide">
+    <Screen>
       {getGuide().map((s) => (
         <Card key={s.id}>
           <ThemedText style={{ fontWeight: 700 }}>{s.title}</ThemedText>
