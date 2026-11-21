@@ -272,7 +272,7 @@ export const seriesSources: SeriesSource[] = [
   { championshipId: 'igtc', kind: 'results', label: 'Results', url: 'https://www.intercontinentalgtchallenge.com/results' },
   { championshipId: 'chinagt', kind: 'results', label: 'Results (timingresult.com)', url: 'https://www.timingresult.com' },
   { championshipId: 'pcca', kind: 'results', label: 'Results (timingresult.com)', url: 'https://www.timingresult.com' },
-  { championshipId: 'pcca', kind: 'news', label: 'News', url: 'https://dealer.porsche.com/my/malaysia/en-GB/Porsche-Carrera-Cup-Asia/Latest-PCCA-News' },
+  { championshipId: 'pcca', kind: 'bulletins', label: 'Documents & notice board', url: 'https://www.carreracupasia.com/media_area?path=Document' },
 ];
 
 /** Real documents from the GTWC Asia Shanghai 2026 noticeboard, as the sync stores them (dates approximate). */
@@ -284,5 +284,6 @@ export const seriesUpdates: SeriesUpdate[] = [
   { id: 'su4', championshipId: 'gtwca', kind: 'bulletins', title: 'Shanghai B3 Team Manager and Driver Briefing Note', url: NB + '1510/B3+Team+Manager+and+Driver+Briefing+Note.pdf', foundAt: '2026-10-28T06:30:00Z' },
   { id: 'su5', championshipId: 'gtwca', kind: 'calendar', title: 'Shanghai Event Timetable V4', url: NB + '1499/2026+GT+World+Challenge+Asia+powered+by+AWS+-+Shanghai+Event+Timetable+v4.pdf', foundAt: '2026-10-27T02:00:00Z' },
   { id: 'su6', championshipId: 'gtwca', kind: 'bulletins', title: 'Shanghai Supplementary Regulations', url: NB + '1513/2026+GTWCA+Supplementary+Regulations+R6+Shanghai+V1.pdf', foundAt: '2026-10-20T09:00:00Z' },
+  { id: 'su8', championshipId: 'pcca', kind: 'bulletins', title: '2026 Support Categories Supplementary Regs Final v1', url: 'https://media.carreracupasia.com/Document/2026/05%20Digital%20Notice%20Board/06%20Rounds%2012%20and%2013%20Singapore/04%20Bulletins%20and%20SRs/2026%20Support%20Categories%20Supplementary%20Regs%20Final%20v1.pdf', foundAt: '2026-10-05T02:00:00Z' },
   { id: 'su7', championshipId: 'gtwca', kind: 'bulletins', title: 'Shanghai Pit Allocation V2', url: NB + '1506/Shanghai+Pit+Allocation+2026+V2.pdf', foundAt: '2026-10-26T04:00:00Z' },
 ];

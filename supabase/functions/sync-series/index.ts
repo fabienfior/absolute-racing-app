@@ -28,6 +28,7 @@ import {
   teamRows,
   type SroDocument,
 } from './sro.ts';
+import { cleanName, fileTitle, matchEventFolder, parseMediaFolder } from './pcca.ts';
 
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
@@ -44,7 +45,7 @@ async function get(url: string): Promise<string> {
 type Source = {
   id: string;
   championship_id: string;
-  adapter: 'sro' | 'links';
+  adapter: 'sro' | 'pcca' | 'links';
   kind: string;
   label: string;
   url: string;
@@ -158,6 +159,56 @@ async function syncLinks(src: Source) {
   return `${fresh.length} new documents`;
 }
 
+/* ---------- Porsche Carrera Cup Asia media centre (public folder tree) ---------- */
+
+async function syncPcca(src: Source) {
+  const base = new URL(src.url).origin; // https://www.carreracupasia.com
+  const list = async (path: string) => parseMediaFolder(await get(`${base}/media_area?path=${encodeURIComponent(path)}`));
+
+  const { data: events } = await supabase
+    .from('events')
+    .select('id, name, location, summary, start_date, end_date')
+    .eq('championship_id', src.championship_id)
+    .gte('end_date', new Date(Date.now() - 14 * DAY).toISOString().slice(0, 10))
+    .lte('start_date', new Date(Date.now() + 60 * DAY).toISOString().slice(0, 10));
+  const years = new Set([today().slice(0, 4), ...(events ?? []).map((e: AppEvent) => e.start_date.slice(0, 4))]);
+
+  type Found = { event: (AppEvent & { location: string; summary: string }) | null; section: string; title: string; url: string };
+  const found: Found[] = [];
+  /** Files in a folder and its subfolders (max 2 levels), all under one section name. */
+  const crawl = async (path: string, section: string, event: Found['event'], depth = 0) => {
+    const { folders, files } = await list(path);
+    files.forEach((f) => found.push({ event, section, title: fileTitle(f.name), url: f.url }));
+    if (depth < 2) for (const f of folders) await crawl(f.path, depth === 0 && event ? cleanName(f.name) : section, event, depth + 1);
+  };
+
+  for (const year of years) {
+    for (const top of (await list(`Document/${year}/`)).folders) {
+      if (/notice board/i.test(top.name)) {
+        // One folder per event: only the events around now.
+        for (const folder of (await list(top.path + '/')).folders) {
+          const event = matchEventFolder(folder.name, (events ?? []) as (AppEvent & { location: string; summary: string })[]);
+          if (event) await crawl(folder.path + '/', 'Notice board', event);
+        }
+      } else {
+        await crawl(top.path + '/', cleanName(top.name), null);
+      }
+    }
+  }
+
+  const fresh = await saveUpdates(
+    found.map((f) => ({ championship_id: src.championship_id, event_id: f.event?.id ?? null, kind: 'bulletins', section: f.section, title: f.title, url: f.url })),
+  );
+  // Alert the team about new notice-board documents during race week.
+  const alerts = fresh
+    .map((u: { url: string }) => found.find((f) => f.url === u.url)!)
+    .filter((f: Found) => f?.event && daysBetween(f.event.start_date, today()) <= 7)
+    .slice(0, 5)
+    .map((f: Found) => ({ title: `New ${f.section}: ${f.title}`, body: `${f.event!.name} – Carrera Cup Asia notice board.`, sent_by: null, target_type: 'all' }));
+  if (alerts.length) await supabase.from('alerts').insert(alerts);
+  return `${fresh.length} new documents`;
+}
+
 /* ---------- Teams area: private documents, copied into the app's document center ---------- */
 
 const CATEGORY: Record<string, string> = { bulletin: 'bulletin', timetable: 'timetable', 'results pdf': 'other', 'entry list': 'other' };
@@ -260,7 +311,7 @@ Deno.serve(async () => {
   const report: Record<string, string> = {};
   for (const src of sources as Source[]) {
     try {
-      report[src.label] = src.adapter === 'sro' ? await syncSro(src) : await syncLinks(src);
+      report[src.label] = src.adapter === 'sro' ? await syncSro(src) : src.adapter === 'pcca' ? await syncPcca(src) : await syncLinks(src);
       if (src.adapter === 'sro' && src.login_secret) report[`${src.label} (teams area)`] = await syncSroTeam(src);
       await supabase.from('series_sources').update({ last_synced_at: new Date().toISOString(), last_error: null }).eq('id', src.id);
     } catch (e) {

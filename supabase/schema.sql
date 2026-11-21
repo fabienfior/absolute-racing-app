@@ -324,11 +324,12 @@ create policy "post messages" on public.messages for insert
 
 -- Official series pages the app reads (see supabase/functions/sync-series).
 -- adapter 'sro': GT World Challenge Asia, Japan Cup, IGTC sites (timetable, noticeboard, results).
+-- adapter 'pcca': Carrera Cup Asia media centre (regulations, bulletins, notice board per event).
 -- adapter 'links': any page; new PDF links on it are listed as updates.
 create table public.series_sources (
   id uuid primary key default gen_random_uuid(),
   championship_id uuid not null references public.championships on delete cascade,
-  adapter text not null check (adapter in ('sro', 'links')),
+  adapter text not null check (adapter in ('sro', 'pcca', 'links')),
   kind text not null default 'news' check (kind in ('calendar', 'results', 'bulletins', 'news')),
   label text not null,
   url text not null,

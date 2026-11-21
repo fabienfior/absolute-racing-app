@@ -84,6 +84,9 @@ folders. Tables: `onboard_folders`, `onboard_videos`.
   by date, copies the official timetable into the event schedule, lists every new document from
   the event page and noticeboard (bulletins, decisions, entry lists) and alerts the team during race
   week, and copies our team's results from each session (cars are matched by number).
+- **Carrera Cup Asia** (adapter `pcca`): reads the public media centre (carreracupasia.com/media_area),
+  season folders (regulations, technical bulletins, results, points) and the notice board of each
+  event (bulletins, entry list, stewards decisions, results), and alerts the team during race week.
 - **Other pages** (adapter `links`, e.g. timingresult.com for China GT and Carrera Cup Asia):
   lists new PDF links found on the page.
 
