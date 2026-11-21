@@ -66,6 +66,9 @@ export default function RootLayout() {
               <Stack.Screen name="notify" options={{ title: t('title.sendAlert'), presentation: 'modal' }} />
               <Stack.Screen name="travel/[eventId]" options={{ title: t('title.travel'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="onboards" options={{ title: t('onboards.title'), headerBackTitle: t('common.back') }} />
+              <Stack.Screen name="onboard-folder/[id]" options={{ title: t('onboards.folders'), headerBackTitle: t('common.back') }} />
+              <Stack.Screen name="onboard-folder/new" options={{ title: t('onboards.newFolder'), presentation: 'modal' }} />
+              <Stack.Screen name="series" options={{ title: t('series.title'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="results" options={{ title: t('results.title'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="standings" options={{ title: t('title.standings'), headerBackTitle: t('common.back') }} />
               <Stack.Screen name="guide" options={{ title: t('title.guide'), headerBackTitle: t('common.back') }} />

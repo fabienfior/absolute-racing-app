@@ -172,3 +172,33 @@ export type Standings = {
   updatedAt: string;
   rows: { position: number; name: string; points: number; ours?: boolean }[];
 };
+
+/** A folder of onboard footage, usually one per event and car, stored in a shared drive. */
+export type OnboardFolder = {
+  id: string;
+  name: string;
+  eventId?: string;
+  carId?: string; // empty = whole team
+  driveUrl: string; // Google Drive, Dropbox, OneDrive… folder link
+  videos: { id: string; label: string; url: string }[]; // optional direct links inside the folder
+  createdAt: string;
+  createdBy: string;
+};
+
+/** An official page of a series that the app watches for new documents. */
+export type SeriesSource = {
+  championshipId: string;
+  kind: 'calendar' | 'results' | 'bulletins' | 'news';
+  label: string;
+  url: string;
+};
+
+/** A document or post found on a series' official page (filled by the sync-series function). */
+export type SeriesUpdate = {
+  id: string;
+  championshipId: string;
+  kind: SeriesSource['kind'];
+  title: string;
+  url: string;
+  foundAt: string;
+};

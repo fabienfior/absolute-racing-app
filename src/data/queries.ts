@@ -1,5 +1,5 @@
-import { cars, championships, channels, documents, events, guide, members, messages, news, standings, teamResults } from '@/data/demo';
-import { isForMember, isTeam, type Alert, type Channel, type Member, type Message, type Role, type Target } from '@/lib/types';
+import { cars, championships, channels, documents, events, guide, members, messages, news, seriesSources, seriesUpdates, standings, teamResults } from '@/data/demo';
+import { isForMember, isTeam, type Alert, type Channel, type Member, type Message, type OnboardFolder, type Role, type Target } from '@/lib/types';
 import { t } from '@/i18n';
 
 /**
@@ -144,3 +144,20 @@ export function getAllTeamResults() {
     .filter((r) => r.event)
     .sort((a, b) => b.event.startDate.localeCompare(a.event.startDate));
 }
+
+/** Official series pages and the documents found on them, newest first. */
+export const getSeriesSources = (championshipId?: string) =>
+  seriesSources.filter((s) => !championshipId || s.championshipId === championshipId);
+
+export const getSeriesUpdates = (championshipId?: string) =>
+  seriesUpdates
+    .filter((u) => !championshipId || u.championshipId === championshipId)
+    .sort((a, b) => b.foundAt.localeCompare(a.foundAt));
+
+/** "Sepang 12 Hours · #1 GT3 car" */
+export function folderSubtitle(f: OnboardFolder) {
+  const event = f.eventId ? getEvent(f.eventId) : undefined;
+  const car = getCar(f.carId);
+  return [event?.name, car ? `${car.number} ${car.model}` : t('onboards.wholeTeam')].filter(Boolean).join(' · ');
+}
+

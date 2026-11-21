@@ -66,6 +66,7 @@ create table public.events (
   start_date date not null,
   end_date date not null,
   summary text not null default '',
+  series_url text, -- the event's page on the series website, filled by sync-series
   created_at timestamptz not null default now()
 );
 
@@ -75,7 +76,8 @@ create table public.sessions (
   starts_at timestamptz not null,
   ends_at timestamptz not null,
   title text not null,
-  car_id uuid references public.cars on delete cascade -- null = whole team
+  car_id uuid references public.cars on delete cascade, -- null = whole team
+  from_series boolean not null default false -- true = official timetable, replaced on each sync
 );
 
 create table public.crew_assignments (
@@ -142,7 +144,9 @@ create table public.team_results (
   car_id uuid not null references public.cars on delete cascade,
   position int not null,
   class_position int,
-  class_name text
+  class_name text,
+  from_series boolean not null default false,
+  unique (event_id, session, car_id)
 );
 
 create table public.standings (
@@ -187,7 +191,7 @@ create table public.alerts (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   body text not null default '',
-  sent_by uuid not null references public.profiles default auth.uid(),
+  sent_by uuid references public.profiles default auth.uid(), -- null = sent automatically (series sync)
   sent_at timestamptz not null default now(),
   target_type public.target_type not null default 'all',
   target_role public.user_role,
@@ -318,4 +322,60 @@ create policy "post messages" on public.messages for insert
     )
   );
 
+-- Official series pages the app reads (see supabase/functions/sync-series).
+-- adapter 'sro': GT World Challenge Asia, Japan Cup, IGTC sites (timetable, noticeboard, results).
+-- adapter 'links': any page; new PDF links on it are listed as updates.
+create table public.series_sources (
+  id uuid primary key default gen_random_uuid(),
+  championship_id uuid not null references public.championships on delete cascade,
+  adapter text not null check (adapter in ('sro', 'links')),
+  kind text not null default 'news' check (kind in ('calendar', 'results', 'bulletins', 'news')),
+  label text not null,
+  url text not null,
+  team_name text not null default 'Absolute Racing', -- how the series writes our team name
+  last_synced_at timestamptz,
+  last_error text
+);
+
+create table public.series_updates (
+  id uuid primary key default gen_random_uuid(),
+  championship_id uuid not null references public.championships on delete cascade,
+  event_id uuid references public.events on delete set null,
+  kind text not null,
+  section text not null default '', -- e.g. "Event Bulletin"
+  title text not null,
+  url text not null unique,
+  found_at timestamptz not null default now()
+);
+
+alter table public.series_sources enable row level security;
+alter table public.series_updates enable row level security;
+create policy "read sources" on public.series_sources for select to authenticated using (true);
+create policy "manage sources" on public.series_sources for all using (public.is_management()) with check (public.is_management());
+create policy "read series updates" on public.series_updates for select to authenticated using (true);
+
+-- Onboard footage: one folder per event and car, kept in a shared drive.
+create table public.onboard_folders (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  event_id uuid references public.events on delete set null,
+  car_id uuid references public.cars on delete set null,
+  drive_url text not null check (drive_url ~ '^https://'),
+  created_by uuid references public.profiles default auth.uid(),
+  created_at timestamptz not null default now()
+);
+create table public.onboard_videos (
+  id uuid primary key default gen_random_uuid(),
+  folder_id uuid not null references public.onboard_folders on delete cascade,
+  label text not null,
+  url text not null check (url ~ '^https://')
+);
+alter table public.onboard_folders enable row level security;
+alter table public.onboard_videos enable row level security;
+create policy "team reads onboard folders" on public.onboard_folders for select using (public.is_team());
+create policy "manage onboard folders" on public.onboard_folders for all using (public.is_management()) with check (public.is_management());
+create policy "team reads onboard videos" on public.onboard_videos for select using (public.is_team());
+create policy "manage onboard videos" on public.onboard_videos for all using (public.is_management()) with check (public.is_management());
+
+alter publication supabase_realtime add table public.series_updates;
 alter publication supabase_realtime add table public.messages, public.alerts, public.documents;

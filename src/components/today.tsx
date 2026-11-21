@@ -103,7 +103,7 @@ export function TodayScreen() {
         </Card>
       ) : null}
 
-      {profile.role === 'driver' ? <DriverMenu /> : null}
+      {profile.role !== 'sponsor' ? <DriverMenu /> : null}
 
       {profile.role === 'management' ? (
         <Button label={t('title.sendAlert')} icon="megaphone-outline" onPress={() => router.push('/notify')} />

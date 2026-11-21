@@ -7,11 +7,16 @@ import type {
   Member,
   Message,
   NewsPost,
+  OnboardFolder,
+  SeriesSource,
+  SeriesUpdate,
   RaceEvent,
   Standings,
   TeamDocument,
   TeamResult,
 } from '@/lib/types';
+
+import { calendarEvents } from './calendar';
 
 /**
  * Placeholder content so the app can be tried before Supabase is connected.
@@ -29,6 +34,7 @@ const date = (dayOffset: number) => {
 
 export const championships: Championship[] = [
   { id: 'gtwca', name: 'GT World Challenge Asia', short: 'GTWC Asia' },
+  { id: 'japancup', name: 'GT World Challenge Asia – Japan Cup', short: 'Japan Cup' },
   { id: 'pcca', name: 'Porsche Carrera Cup Asia', short: 'Carrera Cup Asia' },
   { id: 'igtc', name: 'Intercontinental GT Challenge', short: 'IGTC' },
   { id: 'fiagtwc', name: 'FIA GT World Cup', short: 'FIA GT World Cup' },
@@ -51,6 +57,7 @@ export const members: Member[] = [
   { id: 'u-sp', name: 'Sponsor Guest', role: 'sponsor', jobTitle: 'Partner' },
 ];
 
+/** Sample race weekends (one live, one past) to show the team features, plus the real calendar. */
 export const events: RaceEvent[] = [
   {
     id: 'sepang-12h',
@@ -99,32 +106,6 @@ export const events: RaceEvent[] = [
     ],
   },
   {
-    id: 'gtwca-r1',
-    name: 'GT World Challenge Asia – Round 1',
-    championshipId: 'gtwca',
-    circuit: 'Sepang International Circuit',
-    location: 'Kuala Lumpur, Malaysia',
-    latitude: 2.7608,
-    longitude: 101.7382,
-    startDate: date(40),
-    endDate: date(42),
-    summary: 'Season opener. Two one-hour races.',
-    sessions: [
-      { id: 'r1', startsAt: at(40, 11, 30), endsAt: at(40, 12, 30), title: 'Free practice 1' },
-      { id: 'r2', startsAt: at(41, 10, 15), endsAt: at(41, 10, 45), title: 'Qualifying' },
-      { id: 'r3', startsAt: at(41, 14, 30), endsAt: at(41, 15, 30), title: 'Race 1' },
-      { id: 'r4', startsAt: at(42, 13), endsAt: at(42, 14), title: 'Race 2' },
-    ],
-    travel: [],
-    crew: [
-      { memberId: 'u-tm', duty: 'Team manager' },
-      { memberId: 'u-eng1', carId: 'car-a', duty: 'Race engineer' },
-      { memberId: 'u-d1', carId: 'car-a', duty: 'Driver' },
-      { memberId: 'u-d2', carId: 'car-a', duty: 'Driver' },
-    ],
-    links: [{ label: 'Live timing', url: 'https://www.gt-world-challenge-asia.com', kind: 'livetiming' }],
-  },
-  {
     id: 'pcca-r1',
     name: 'Carrera Cup Asia – Round 1',
     championshipId: 'pcca',
@@ -144,6 +125,7 @@ export const events: RaceEvent[] = [
       { label: 'Onboard lap', url: 'https://www.youtube.com', kind: 'onboard' },
     ],
   },
+  ...calendarEvents,
 ];
 
 export const news: NewsPost[] = [
@@ -239,4 +221,66 @@ export const standings: Standings[] = [
     updatedAt: at(-30, 12),
     rows: [],
   },
+];
+
+export const onboardFolders: OnboardFolder[] = [
+  {
+    id: 'f1',
+    name: 'Sepang 12h – Car #1',
+    eventId: 'sepang-12h',
+    carId: 'car-a',
+    driveUrl: 'https://drive.google.com/drive/folders/your-folder-id',
+    videos: [
+      { id: 'v1', label: 'Free practice – Driver One', url: 'https://drive.google.com/file/d/your-file-id/view' },
+      { id: 'v2', label: 'Qualifying – Driver Two', url: 'https://drive.google.com/file/d/your-file-id/view' },
+    ],
+    createdAt: at(-1, 17),
+    createdBy: 'Chris Engineer',
+  },
+  {
+    id: 'f2',
+    name: 'Sepang 12h – Car #2',
+    eventId: 'sepang-12h',
+    carId: 'car-b',
+    driveUrl: 'https://drive.google.com/drive/folders/your-folder-id',
+    videos: [],
+    createdAt: at(-1, 17, 5),
+    createdBy: 'Chris Engineer',
+  },
+  {
+    id: 'f3',
+    name: 'Shanghai – Carrera Cup races',
+    eventId: 'pcca-r1',
+    carId: 'car-b',
+    driveUrl: 'https://drive.google.com/drive/folders/your-folder-id',
+    videos: [{ id: 'v3', label: 'Race 1 – full onboard', url: 'https://drive.google.com/file/d/your-file-id/view' }],
+    createdAt: at(-18, 20),
+    createdBy: 'Alex Team Manager',
+  },
+];
+
+/** Official pages the app reads (sync-series). Crew can change them in the database. */
+export const seriesSources: SeriesSource[] = [
+  { championshipId: 'gtwca', kind: 'calendar', label: 'Calendar', url: 'https://www.gt-world-challenge-asia.com/calendar' },
+  { championshipId: 'gtwca', kind: 'results', label: 'Results', url: 'https://www.gt-world-challenge-asia.com/results' },
+  { championshipId: 'gtwca', kind: 'news', label: 'News', url: 'https://www.gt-world-challenge-asia.com/news' },
+  { championshipId: 'gtwca', kind: 'results', label: 'Standings', url: 'https://www.gt-world-challenge-asia.com/standings' },
+  { championshipId: 'japancup', kind: 'calendar', label: 'Calendar', url: 'https://www.gt-world-challenge-asia.com/calendar' },
+  { championshipId: 'igtc', kind: 'calendar', label: 'Calendar', url: 'https://www.intercontinentalgtchallenge.com/calendar' },
+  { championshipId: 'igtc', kind: 'results', label: 'Results', url: 'https://www.intercontinentalgtchallenge.com/results' },
+  { championshipId: 'chinagt', kind: 'results', label: 'Results (timingresult.com)', url: 'https://www.timingresult.com' },
+  { championshipId: 'pcca', kind: 'results', label: 'Results (timingresult.com)', url: 'https://www.timingresult.com' },
+  { championshipId: 'pcca', kind: 'news', label: 'News', url: 'https://dealer.porsche.com/my/malaysia/en-GB/Porsche-Carrera-Cup-Asia/Latest-PCCA-News' },
+];
+
+/** Real documents from the GTWC Asia Shanghai 2026 noticeboard, as the sync stores them (dates approximate). */
+const NB = 'https://www.gt-world-challenge-asia.com/documents/notice/';
+export const seriesUpdates: SeriesUpdate[] = [
+  { id: 'su1', championshipId: 'gtwca', kind: 'bulletins', title: 'Shanghai B6 Race 1 Countdown', url: NB + '1528/B6+Race+1+Countdown.pdf', foundAt: '2026-10-31T03:40:00Z' },
+  { id: 'su2', championshipId: 'gtwca', kind: 'bulletins', title: 'Shanghai B5 Qualifying Countdown', url: NB + '1527/B5+Qualifying+Countdown.pdf', foundAt: '2026-10-30T23:10:00Z' },
+  { id: 'su3', championshipId: 'gtwca', kind: 'bulletins', title: 'GTWCA Shanghai Sporting Note 1', url: NB + '1512/GTWCA+Shanghai+Sporting+Note+1+.pdf', foundAt: '2026-10-29T08:00:00Z' },
+  { id: 'su4', championshipId: 'gtwca', kind: 'bulletins', title: 'Shanghai B3 Team Manager and Driver Briefing Note', url: NB + '1510/B3+Team+Manager+and+Driver+Briefing+Note.pdf', foundAt: '2026-10-28T06:30:00Z' },
+  { id: 'su5', championshipId: 'gtwca', kind: 'calendar', title: 'Shanghai Event Timetable V4', url: NB + '1499/2026+GT+World+Challenge+Asia+powered+by+AWS+-+Shanghai+Event+Timetable+v4.pdf', foundAt: '2026-10-27T02:00:00Z' },
+  { id: 'su6', championshipId: 'gtwca', kind: 'bulletins', title: 'Shanghai Supplementary Regulations', url: NB + '1513/2026+GTWCA+Supplementary+Regulations+R6+Shanghai+V1.pdf', foundAt: '2026-10-20T09:00:00Z' },
+  { id: 'su7', championshipId: 'gtwca', kind: 'bulletins', title: 'Shanghai Pit Allocation V2', url: NB + '1506/Shanghai+Pit+Allocation+2026+V2.pdf', foundAt: '2026-10-26T04:00:00Z' },
 ];

@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
-import { getDocuments, getUnreadMessages } from '@/data/queries';
+import { getDocuments, getSeriesUpdates, getUnreadMessages } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { t } from '@/i18n';
 import { useSession } from '@/lib/session';
@@ -42,9 +42,10 @@ function Tile({
   );
 }
 
-/** Quick-access menu for drivers: onboards, results, messages (with unread count) and documents. */
+/** Quick-access menu for drivers: onboards, results, messages and documents (with unread counts), series updates. */
 export function DriverMenu() {
-  const { profile, channelReadAt, docReads, messages } = useSession();
+  const { profile, channelReadAt, docReads, messages, seriesSeenAt } = useSession();
+  const newSeries = getSeriesUpdates().filter((u) => u.foundAt > seriesSeenAt).length;
   const unreadMessages = getUnreadMessages(messages, profile, channelReadAt);
   const unreadDocs = getDocuments(profile).filter((d) => !(docReads[d.id] ?? []).includes(profile.id)).length;
 
@@ -54,6 +55,7 @@ export function DriverMenu() {
       <Tile icon="trophy-outline" label={t('menu.results')} href="/results" />
       <Tile icon="chatbubbles-outline" label={t('menu.messages')} href="/messages" badge={unreadMessages} />
       <Tile icon="folder-open-outline" label={t('menu.documents')} href="/documents" badge={unreadDocs} />
+      <Tile icon="flag-outline" label={t('menu.series')} href="/series" badge={newSeries} />
     </View>
   );
 }

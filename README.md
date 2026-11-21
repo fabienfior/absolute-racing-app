@@ -59,3 +59,39 @@ English, French, Simplified Chinese, Japanese, Thai and Malay. The app follows t
 - Crew editing screens (events, travel, crew, documents, news, guide)
 - Push notifications for alerts, documents and messages
 - App icon and splash screen artwork from the logo
+
+## Season calendar
+
+`src/data/calendar.ts` is generated from the team calendar spreadsheet (one colour per series):
+
+```
+python3 scripts/import-calendar.py Absolute_Racing_2027_Calendar.xlsx 2027
+```
+
+New venues go in the `VENUES` table at the top of the script.
+
+## Onboard folders
+
+Crew creates a folder per event and car with a link to a shared Google Drive / Dropbox / OneDrive
+folder, and can add direct links to single videos. Drivers see their car's folders and whole-team
+folders. Tables: `onboard_folders`, `onboard_videos`.
+
+## Series sync (official timetables, bulletins, results)
+
+`supabase/functions/sync-series` reads the official websites on the server:
+
+- **SRO sites** (GT World Challenge Asia, Japan Cup, IGTC; adapter `sro`): matches each of our events
+  by date, copies the official timetable into the event schedule, lists every new document from
+  the event page and noticeboard (bulletins, decisions, entry lists) and alerts the team during race
+  week, and copies our team's results from each session (cars are matched by number).
+- **Other pages** (adapter `links`, e.g. timingresult.com for China GT and Carrera Cup Asia):
+  lists new PDF links found on the page.
+
+Pages are configured in the `series_sources` table. Deploy and run every 15 minutes:
+
+```
+supabase functions deploy sync-series
+select cron.schedule('sync-series', '*/15 * * * *', $$
+  select net.http_post(url := 'https://<project>.supabase.co/functions/v1/sync-series',
+                       headers := '{"Authorization": "Bearer <service role key>"}'::jsonb) $$);
+```

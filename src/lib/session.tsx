@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import { alerts as demoAlerts, documentReads, members, messages as demoMessages } from '@/data/demo';
+import { alerts as demoAlerts, documentReads, members, messages as demoMessages, onboardFolders } from '@/data/demo';
 
-import type { Alert, Member, Message, Role, Target } from './types';
+import type { Alert, Member, Message, OnboardFolder, Role, Target } from './types';
 
 /**
  * Demo app state. Once Supabase is connected, the profile comes from the signed-in
@@ -27,6 +27,13 @@ type AppState = {
   markChannelRead: (channelId: string) => void;
   messages: Message[];
   sendMessage: (channelId: string, body: string) => void;
+  /** Onboard folders (drive links). Crew adds folders and videos. */
+  folders: OnboardFolder[];
+  addFolder: (input: Pick<OnboardFolder, 'name' | 'eventId' | 'carId' | 'driveUrl'>) => string;
+  addVideo: (folderId: string, label: string, url: string) => void;
+  /** When this person last opened the series updates page. */
+  seriesSeenAt: string;
+  markSeriesSeen: () => void;
 };
 
 const AppContext = createContext<AppState | null>(null);
@@ -69,6 +76,27 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     [profile.name],
   );
 
+  const [folders, setFolders] = useState<OnboardFolder[]>(onboardFolders);
+  const addFolder = useCallback<AppState['addFolder']>(
+    (input) => {
+      const id = `f${Date.now()}`;
+      setFolders((prev) => [{ id, videos: [], createdAt: new Date().toISOString(), createdBy: profile.name, ...input }, ...prev]);
+      return id;
+    },
+    [profile.name],
+  );
+  const addVideo = useCallback(
+    (folderId: string, label: string, url: string) =>
+      setFolders((prev) =>
+        prev.map((f) => (f.id === folderId ? { ...f, videos: [...f.videos, { id: `v${Date.now()}`, label, url }] } : f)),
+      ),
+    [],
+  );
+
+  // Demo: updates found in the last 12 hours count as new.
+  const [seriesSeenAt, setSeriesSeenAt] = useState(() => new Date(Date.now() - 12 * 3_600_000).toISOString());
+  const markSeriesSeen = useCallback(() => setSeriesSeenAt(new Date().toISOString()), []);
+
   const sendAlert = useCallback<AppState['sendAlert']>(
     (input) =>
       setAlerts((prev) => [
@@ -93,8 +121,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ entered, enter, signOut, profile, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage }),
-    [entered, enter, signOut, profile, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage],
+    () => ({ entered, enter, signOut, profile, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage, folders, addFolder, addVideo, seriesSeenAt, markSeriesSeen }),
+    [entered, enter, signOut, profile, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage, folders, addFolder, addVideo, seriesSeenAt, markSeriesSeen],
   );
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
