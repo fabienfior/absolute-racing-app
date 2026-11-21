@@ -5,7 +5,7 @@ Built with Expo (React Native + TypeScript) and Supabase.
 
 ## Who sees what
 
-| | Management | Drivers | Sponsors |
+| | Crew | Drivers | Sponsors |
 |---|---|---|---|
 | News and season calendar (filter by championship) | ✓ | ✓ | ✓ |
 | Our results, championship standings, track weather forecast | ✓ | ✓ | ✓ |
@@ -32,7 +32,7 @@ npm run android
 ```
 
 The app runs on demo data (`src/data/demo.ts`) until Supabase is connected.
-Use the Profile tab to preview it as management, a driver or a sponsor.
+Use the Profile tab to preview it as crew, a driver or a sponsor.
 
 ## Connect Supabase
 
@@ -56,6 +56,6 @@ English, French, Simplified Chinese, Japanese, Thai and Malay. The app follows t
 ## Still to do
 
 - Sign-in screen and Supabase-backed queries
-- Management editing screens (events, travel, crew, documents, news, guide)
+- Crew editing screens (events, travel, crew, documents, news, guide)
 - Push notifications for alerts, documents and messages
 - App icon and splash screen artwork from the logo

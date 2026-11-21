@@ -206,7 +206,7 @@ export const guide: GuideSection[] = [
 export const channels: Channel[] = [
   { id: 'all-team', name: 'Whole team', roles: ['management', 'driver'] },
   { id: 'drivers', name: 'Drivers', roles: ['management', 'driver'] },
-  { id: 'management', name: 'Management', roles: ['management'] },
+  { id: 'management', name: 'Crew', roles: ['management'] },
 ];
 
 export const messages: Message[] = [

@@ -109,13 +109,13 @@ export const en = {
   // Targets
   'target.all': 'Whole team',
   'target.drivers': 'Drivers',
-  'target.management': 'Management',
+  'target.management': 'Crew',
 
   // Alerts
   'alerts.empty': 'No alerts yet.',
   'alerts.tapToOpen': 'Tap to open document',
   'alerts.unread': 'Alerts, {count} unread',
-  'notify.onlyManagement': 'Only management can send alerts.',
+  'notify.onlyManagement': 'Only crew can send alerts.',
   'notify.sendTo': 'Send to',
   'notify.reaches': 'Reaches {count} people',
   'notify.message': 'Message',
@@ -131,7 +131,7 @@ export const en = {
   'more.title': 'More',
   'more.language': 'Language',
   'more.previewAs': 'Preview as (demo only)',
-  'role.management': 'Management',
+  'role.management': 'Crew',
   'role.managementHint': 'Everything, plus sending alerts and read receipts',
   'role.driver': 'Driver',
   'role.driverHint': 'Today dashboard, documents, crew, travel, results',
