@@ -15,7 +15,19 @@
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-import { parseCalendar, parseEventPage, parseNoticeboard, parseResultsIndex, parseSeasons, parseSessionResults, teamRows } from './sro.ts';
+import {
+  isLoginPage,
+  parseCalendar,
+  parseEventPage,
+  parseNoticeboard,
+  parseResultsIndex,
+  parseSeasons,
+  parseSessionResults,
+  parseTeamDocuments,
+  parseTeamHome,
+  teamRows,
+  type SroDocument,
+} from './sro.ts';
 
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
@@ -29,11 +41,23 @@ async function get(url: string): Promise<string> {
   return await res.text();
 }
 
-type Source = { id: string; championship_id: string; adapter: 'sro' | 'links'; kind: string; label: string; url: string; team_name: string };
+type Source = {
+  id: string;
+  championship_id: string;
+  adapter: 'sro' | 'links';
+  kind: string;
+  label: string;
+  url: string;
+  team_name: string;
+  /** Prefix of the secrets holding the teams-area login, e.g. SRO_ASIA -> SRO_ASIA_USERNAME / SRO_ASIA_PASSWORD. */
+  login_secret: string | null;
+};
 type AppEvent = { id: string; name: string; start_date: string; end_date: string };
 
 /** Saves documents not seen before. Returns the new ones. */
-async function saveUpdates(rows: { championship_id: string; event_id?: string; kind: string; section?: string; title: string; url: string }[]) {
+async function saveUpdates(
+  rows: { championship_id: string; event_id?: string | null; kind: string; section?: string; title: string; url: string; team_only?: boolean }[],
+) {
   if (!rows.length) return [];
   const { data, error } = await supabase
     .from('series_updates')
@@ -134,6 +158,102 @@ async function syncLinks(src: Source) {
   return `${fresh.length} new documents`;
 }
 
+/* ---------- Teams area: private documents, copied into the app's document center ---------- */
+
+const CATEGORY: Record<string, string> = { bulletin: 'bulletin', timetable: 'timetable', 'results pdf': 'other', 'entry list': 'other' };
+
+/** Signs in to the teams area and returns the session cookie. */
+async function teamLogin(base: string, prefix: string): Promise<string> {
+  const username = Deno.env.get(`${prefix}_USERNAME`);
+  const password = Deno.env.get(`${prefix}_PASSWORD`);
+  if (!username || !password) throw new Error(`secrets ${prefix}_USERNAME / ${prefix}_PASSWORD are not set`);
+  const ua = 'AbsoluteRacingApp/1.0 (team app; series sync)';
+  const jar = new Map<string, string>();
+  const keep = (res: Response) => res.headers.getSetCookie().forEach((c) => {
+    const [pair] = c.split(';');
+    const i = pair.indexOf('=');
+    jar.set(pair.slice(0, i).trim(), pair.slice(i + 1));
+  });
+  // Open the form first so the site's session cookie exists, then post the login with it.
+  keep(await fetch(`${base}/teams-login`, { headers: { 'user-agent': ua } }));
+  const cookieHeader = () => [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
+  keep(
+    await fetch(`${base}/teams-login`, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': ua, cookie: cookieHeader() },
+      body: new URLSearchParams({ username, password, login: 'Submit' }),
+    }),
+  );
+  const cookie = cookieHeader();
+  if (!cookie) throw new Error('teams login returned no session');
+  return cookie;
+}
+
+async function getAs(url: string, cookie: string) {
+  const res = await fetch(url, { headers: { cookie, 'user-agent': 'AbsoluteRacingApp/1.0 (team app; series sync)' } });
+  if (!res.ok) throw new Error(`${res.status} for ${url}`);
+  return res;
+}
+
+/** Downloads a teams-area file into storage and lists it in the team's documents (team only, read receipts). */
+async function importTeamDocument(doc: SroDocument, cookie: string, championshipId: string, eventId: string | null, meeting: string) {
+  const res = await getAs(doc.url, cookie);
+  const type = res.headers.get('content-type') ?? 'application/octet-stream';
+  if (type.includes('text/html')) throw new Error('teams session expired while downloading');
+  const name = decodeURIComponent(doc.url.split('/').pop() ?? 'document').replace(/[^\w.\- ]+/g, '_');
+  const path = `series/${championshipId}/${meeting}/${doc.url.match(/\/team\/(\d+)\//)?.[1] ?? Date.now()}-${name}`;
+  const { error: upErr } = await supabase.storage.from('documents').upload(path, await res.arrayBuffer(), { contentType: type, upsert: true });
+  if (upErr) throw upErr;
+  await supabase.from('documents').insert({
+    title: doc.title,
+    category: CATEGORY[doc.section.toLowerCase()] ?? 'other',
+    event_id: eventId,
+    storage_path: path,
+    target_type: 'all',
+  });
+}
+
+async function syncSroTeam(src: Source) {
+  if (!src.login_secret) return 'no teams login';
+  const base = new URL(src.url).origin;
+  const cookie = await teamLogin(base, src.login_secret);
+
+  const pages: { path: string; eventId: string | null; meeting: string; defaultSection?: string }[] = [];
+  // Season documents (regulations, tyres, fuel, logistics…).
+  const home = await (await getAs(`${base}/teams-login-home`, cookie)).text();
+  if (isLoginPage(home)) throw new Error('teams login failed: check the username and password secrets');
+  for (const type of parseTeamHome(home)) pages.push({ path: type.path, eventId: null, meeting: 'season', defaultSection: type.title });
+
+  // Event documents for our events of the last 2 weeks and next 2 months (meeting id comes from the public sync).
+  const { data: events } = await supabase
+    .from('events')
+    .select('id, series_url, start_date')
+    .eq('championship_id', src.championship_id)
+    .not('series_url', 'is', null)
+    .gte('end_date', new Date(Date.now() - 14 * DAY).toISOString().slice(0, 10))
+    .lte('start_date', new Date(Date.now() + 60 * DAY).toISOString().slice(0, 10));
+  for (const e of events ?? []) {
+    const meeting = e.series_url.match(/\/event\/(\d+)\//)?.[1];
+    if (meeting) pages.push({ path: `/teams-login-meeting?filter_meeting_id=${meeting}`, eventId: e.id, meeting });
+  }
+
+  let added = 0;
+  for (const page of pages) {
+    const html = await (await getAs(base + page.path, cookie)).text();
+    const docs = parseTeamDocuments(html, base + page.path, page.defaultSection).filter((d) => d.section !== 'Results CSV');
+    const fresh = await saveUpdates(
+      docs.map((d) => ({ championship_id: src.championship_id, event_id: page.eventId, kind: 'team', section: d.section, title: d.title, url: d.url, team_only: true })),
+    );
+    for (const f of fresh) {
+      const doc = docs.find((d) => d.url === f.url)!;
+      await importTeamDocument(doc, cookie, src.championship_id, page.eventId, page.meeting);
+      added++;
+    }
+  }
+  return `${added} team documents added`;
+}
+
 Deno.serve(async () => {
   const { data: sources, error } = await supabase.from('series_sources').select('*');
   if (error) return new Response(error.message, { status: 500 });
@@ -141,6 +261,7 @@ Deno.serve(async () => {
   for (const src of sources as Source[]) {
     try {
       report[src.label] = src.adapter === 'sro' ? await syncSro(src) : await syncLinks(src);
+      if (src.adapter === 'sro' && src.login_secret) report[`${src.label} (teams area)`] = await syncSroTeam(src);
       await supabase.from('series_sources').update({ last_synced_at: new Date().toISOString(), last_error: null }).eq('id', src.id);
     } catch (e) {
       report[src.label] = `error: ${(e as Error).message}`;

@@ -179,3 +179,38 @@ export function teamRows(rows: SroResultRow[], teamName: string) {
       classPosition: rows.filter((o) => o.className === r.className && o.category === r.category && o.position <= r.position).length,
     }));
 }
+
+/* ---------- Teams area (needs the team login) ----------
+ *   /teams-login                                  POST username, password, login=Submit
+ *   /teams-login-home                             season documents by type (regulations, fuel, tyres…)
+ *   /teams-login-documents?documenttype_id=N      one document type
+ *   /teams-login-season?filter_season_id=N        meetings of a season
+ *   /teams-login-meeting?filter_meeting_id=N      per event: entry list, information / forms, bulletin,
+ *                                                 timetable, results PDF, results CSV
+ */
+
+/** Documents on a teams-area page, with the section heading they sit under. */
+export function parseTeamDocuments(html: string, pageUrl: string, defaultSection = 'Entry list'): SroDocument[] {
+  const docs: SroDocument[] = [];
+  let section = defaultSection;
+  const re = /<div class="col col-main"><h3>([^<]+)<\/h3>|<li class="col link-archive-item"><a href="([^"]+)"><h3><span>([\s\S]*?)<\/span>/g;
+  for (const m of html.matchAll(re)) {
+    if (m[1]) section = decode(m[1]);
+    else {
+      const url = absolute(pageUrl, m[2]);
+      if (!docs.some((d) => d.url === url)) docs.push({ section, title: decode(m[3].replace(/<br\s*\/?>/g, ' ')), url });
+    }
+  }
+  return docs;
+}
+
+/** Season document types on the teams home page, e.g. { title: 'Championship Regulations', path: '/teams-login-documents?documenttype_id=15' }. */
+export function parseTeamHome(html: string): { title: string; path: string }[] {
+  return [...html.matchAll(/href="\/?(teams-login-documents\?documenttype_id=\d+)"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => ({
+    path: '/' + m[1],
+    title: decode(m[2]),
+  }));
+}
+
+/** True when the page is the login form (not signed in, or the session expired). */
+export const isLoginPage = (html: string) => /<form class="login-form"/.test(html) && /name="password"/.test(html);

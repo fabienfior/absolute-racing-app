@@ -95,3 +95,17 @@ select cron.schedule('sync-series', '*/15 * * * *', $$
   select net.http_post(url := 'https://<project>.supabase.co/functions/v1/sync-series',
                        headers := '{"Authorization": "Bearer <service role key>"}'::jsonb) $$);
 ```
+
+### Teams area (private SRO documents)
+
+With the team login, the sync also reads the SRO teams area (season documents, and per event:
+entry list, information / forms, bulletins, timetables, results PDF). Each new file is copied into
+the `documents` storage bucket and listed in the app's Documents for the team, with read receipts.
+Sponsors never see them.
+
+Set the login as Supabase secrets (never in the code), then set `login_secret = 'SRO_ASIA'` on the
+GT World Challenge Asia row of `series_sources`:
+
+```
+supabase secrets set SRO_ASIA_USERNAME=... SRO_ASIA_PASSWORD=...
+```

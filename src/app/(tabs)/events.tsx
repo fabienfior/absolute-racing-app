@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { EventCard } from '@/components/event-card';
 import { ThemedText } from '@/components/themed-text';
@@ -9,7 +9,6 @@ import { Spacing } from '@/constants/theme';
 import { getChampionships, getPastEvents, getSeriesUpdates, getUpcomingEvents } from '@/data/queries';
 import { t } from '@/i18n';
 import { useSession } from '@/lib/session';
-import { View } from 'react-native';
 
 export default function EventsScreen() {
   const [champ, setChamp] = useState<string | null>(null);

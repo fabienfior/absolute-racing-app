@@ -333,6 +333,7 @@ create table public.series_sources (
   label text not null,
   url text not null,
   team_name text not null default 'Absolute Racing', -- how the series writes our team name
+  login_secret text, -- e.g. 'SRO_ASIA': the function reads SRO_ASIA_USERNAME / SRO_ASIA_PASSWORD secrets for the teams area
   last_synced_at timestamptz,
   last_error text
 );
@@ -345,6 +346,7 @@ create table public.series_updates (
   section text not null default '', -- e.g. "Event Bulletin"
   title text not null,
   url text not null unique,
+  team_only boolean not null default false, -- from the teams area: copied into documents, never shown to sponsors
   found_at timestamptz not null default now()
 );
 
@@ -352,7 +354,7 @@ alter table public.series_sources enable row level security;
 alter table public.series_updates enable row level security;
 create policy "read sources" on public.series_sources for select to authenticated using (true);
 create policy "manage sources" on public.series_sources for all using (public.is_management()) with check (public.is_management());
-create policy "read series updates" on public.series_updates for select to authenticated using (true);
+create policy "read series updates" on public.series_updates for select to authenticated using (not team_only or public.is_team());
 
 -- Onboard footage: one folder per event and car, kept in a shared drive.
 create table public.onboard_folders (
