@@ -17,6 +17,7 @@ import type {
 } from '@/lib/types';
 
 import { calendarEvents } from './calendar';
+import { pccaEvents } from './calendar-pcca';
 
 /**
  * Placeholder content so the app can be tried before Supabase is connected.
@@ -126,6 +127,7 @@ export const events: RaceEvent[] = [
     ],
   },
   ...calendarEvents,
+  ...pccaEvents,
 ];
 
 export const news: NewsPost[] = [
