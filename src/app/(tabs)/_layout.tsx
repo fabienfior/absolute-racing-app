@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
-import type { ColorValue } from 'react-native';
+import { View, type ColorValue } from 'react-native';
 
 import { FontFamily } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -17,10 +17,11 @@ const icon =
 
 export default function TabLayout() {
   const theme = useTheme();
-  const { profile, entered, channelReadAt, messages } = useSession();
+  const { profile, entered, loading, channelReadAt, messages } = useSession();
   const unread = getUnreadMessages(messages, profile, channelReadAt);
   const team = isTeam(profile.role);
 
+  if (loading) return <View style={{ flex: 1, backgroundColor: theme.background }} />;
   if (!entered) return <Redirect href="/welcome" />;
 
   return (

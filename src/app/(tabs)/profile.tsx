@@ -10,10 +10,10 @@ import { useSession } from '@/lib/session';
 import { isTeam, type Role } from '@/lib/types';
 import { LANGUAGES, t, useLanguage } from '@/i18n';
 
-const ROLES: Role[] = ['management', 'driver', 'sponsor'];
+const ROLES: Role[] = ['crew', 'driver', 'sponsor'];
 
 export default function ProfileScreen() {
-  const { profile, setRole, signOut } = useSession();
+  const { live, profile, canPreview, setRole, signOut } = useSession();
   const theme = useTheme();
   const car = getCar(profile.carId);
   const { language, setLanguage } = useLanguage();
@@ -59,22 +59,26 @@ export default function ProfileScreen() {
         ))}
       </View>
 
-      <SectionTitle>{t('more.previewAs')}</SectionTitle>
-      <View style={{ gap: Spacing.two }}>
-        {ROLES.map((r) => {
-          const active = r === profile.role;
-          return (
-            <Pressable key={r} onPress={() => setRole(r)}>
-              <Card style={{ borderWidth: 2, borderColor: active ? theme.tint : 'transparent' }}>
-                <ThemedText style={{ fontWeight: 700 }}>{t(`role.${r}`)}</ThemedText>
-                <ThemedText type="small" themeColor="textSecondary">
-                  {t(`role.${r}Hint`)}
-                </ThemedText>
-              </Card>
-            </Pressable>
-          );
-        })}
-      </View>
+      {canPreview ? (
+        <>
+          <SectionTitle>{live ? t('more.previewAs') : t('more.previewAsDemo')}</SectionTitle>
+          <View style={{ gap: Spacing.two }}>
+            {ROLES.map((r) => {
+              const active = r === profile.role;
+              return (
+                <Pressable key={r} onPress={() => setRole(r)}>
+                  <Card style={{ borderWidth: 2, borderColor: active ? theme.tint : 'transparent' }}>
+                    <ThemedText style={{ fontWeight: 700 }}>{t(`role.${r}`)}</ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {t(`role.${r}Hint`)}
+                    </ThemedText>
+                  </Card>
+                </Pressable>
+              );
+            })}
+          </View>
+        </>
+      ) : null}
       <View style={{ marginTop: Spacing.four }}>
         <Button
           label={t('more.signOut')}

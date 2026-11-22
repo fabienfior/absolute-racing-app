@@ -54,7 +54,7 @@ export default function DocumentScreen() {
         onPress={() => Share.share({ message: `${doc.title}\n${doc.url}` }).catch(() => {})}
       />
 
-      {profile.role === 'management' ? (
+      {profile.role === 'crew' ? (
         <>
           <SectionTitle>
             {t('docs.readBy', { count: audience.filter((m) => readers.includes(m.id)).length, total: audience.length })}

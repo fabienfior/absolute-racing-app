@@ -49,9 +49,9 @@ export const cars: Car[] = [
 ];
 
 export const members: Member[] = [
-  { id: 'u-tm', name: 'Alex Team Manager', role: 'management', jobTitle: 'Team manager', phone: '+00 000 000 001' },
-  { id: 'u-co', name: 'Sam Coordinator', role: 'management', jobTitle: 'Team coordinator', phone: '+00 000 000 002' },
-  { id: 'u-eng1', name: 'Chris Engineer', role: 'management', jobTitle: 'Race engineer', carId: 'car-a' },
+  { id: 'u-tm', name: 'Alex Team Manager', role: 'crew', jobTitle: 'Team manager', phone: '+00 000 000 001' },
+  { id: 'u-co', name: 'Sam Coordinator', role: 'crew', jobTitle: 'Team coordinator', phone: '+00 000 000 002' },
+  { id: 'u-eng1', name: 'Chris Engineer', role: 'crew', jobTitle: 'Race engineer', carId: 'car-a' },
   { id: 'u-d1', name: 'Driver One', role: 'driver', jobTitle: 'Driver', carId: 'car-a', phone: '+00 000 000 011' },
   { id: 'u-d2', name: 'Driver Two', role: 'driver', jobTitle: 'Driver', carId: 'car-a', phone: '+00 000 000 012' },
   { id: 'u-d3', name: 'Driver Three', role: 'driver', jobTitle: 'Driver', carId: 'car-b', phone: '+00 000 000 013' },
@@ -188,9 +188,9 @@ export const guide: GuideSection[] = [
 ];
 
 export const channels: Channel[] = [
-  { id: 'all-team', name: 'Whole team', roles: ['management', 'driver'] },
-  { id: 'drivers', name: 'Drivers', roles: ['management', 'driver'] },
-  { id: 'management', name: 'Crew', roles: ['management'] },
+  { id: 'all-team', name: 'Whole team', roles: ['crew', 'driver'] },
+  { id: 'drivers', name: 'Drivers', roles: ['crew', 'driver'] },
+  { id: 'crew', name: 'Crew', roles: ['crew'] },
 ];
 
 export const messages: Message[] = [

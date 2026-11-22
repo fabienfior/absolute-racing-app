@@ -59,7 +59,7 @@ export default function FolderScreen() {
         <Empty>{t('onboards.empty')}</Empty>
       )}
 
-      {profile.role === 'management' ? (
+      {profile.role === 'crew' ? (
         <>
           <SectionTitle>{t('onboards.addVideo')}</SectionTitle>
           <TextInput value={label} onChangeText={setLabel} placeholder={t('onboards.videoName')} placeholderTextColor={theme.textSecondary} style={input} />

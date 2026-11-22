@@ -11,7 +11,7 @@ import { useSession } from '@/lib/session';
 
 export default function OnboardsScreen() {
   const { profile, folders } = useSession();
-  const crew = profile.role === 'management';
+  const crew = profile.role === 'crew';
   // Drivers see their own car's folders and whole-team folders.
   const visible = folders
     .filter((f) => crew || !f.carId || f.carId === profile.carId)

@@ -109,7 +109,7 @@ export const en = {
   // Targets
   'target.all': 'Whole team',
   'target.drivers': 'Drivers',
-  'target.management': 'Crew',
+  'target.crew': 'Crew',
 
   // Alerts
   'alerts.empty': 'No alerts yet.',
@@ -130,9 +130,9 @@ export const en = {
   // More
   'more.title': 'More',
   'more.language': 'Language',
-  'more.previewAs': 'Preview as (demo only)',
-  'role.management': 'Crew',
-  'role.managementHint': 'Everything, plus sending alerts and read receipts',
+  'more.previewAs': 'Preview as',
+  'role.crew': 'Crew',
+  'role.crewHint': 'Everything, plus sending alerts and read receipts',
   'role.driver': 'Driver',
   'role.driverHint': 'Today dashboard, documents, crew, travel, results',
   'role.sponsor': 'Sponsor',
@@ -154,9 +154,15 @@ export const en = {
   'welcome.teamHint': 'Sign in with your team account',
   'welcome.guest': 'Fans & partners',
   'welcome.guestHint': 'Calendar, results, news and videos, no account needed',
+  'signin.code': '6-digit code from the email',
+  'signin.verify': 'Sign in',
+  'signin.codeSent': 'Code sent. Check your inbox (and spam folder), then type the code below.',
+  'signin.otherEmail': 'Use another email',
+  'more.previewAsDemo': 'Preview as (demo only)',
+  'common.loading': 'Loading…',
   'signin.title': 'Team sign-in',
   'signin.email': 'Work email',
-  'signin.send': 'Email me a sign-in link',
+  'signin.send': 'Email me a sign-in code',
   'signin.note': 'Ask the team manager to add your email if you are new.',
   'signin.demo': 'Demo: enter as',
   'signin.comingSoon': 'Sign-in links work once the app is connected to the database. Use the demo buttons below for now.',

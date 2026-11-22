@@ -16,7 +16,7 @@ const DIRECTIONS: TravelItem['direction'][] = ['outbound', 'onsite', 'return'];
 export default function TravelScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const { profile } = useSession();
-  const isManagement = profile.role === 'management';
+  const isManagement = profile.role === 'crew';
   const [direction, setDirection] = useState<TravelItem['direction']>('outbound');
   const [everyone, setEveryone] = useState(false);
   const event = getEvent(eventId);

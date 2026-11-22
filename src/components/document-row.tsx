@@ -37,7 +37,7 @@ export function DocumentRow({ doc }: { doc: TeamDocument }) {
           <ThemedText type="small" themeColor="textSecondary">
             {category} · {describeTarget(doc.target)} · {timeAgo(doc.publishedAt)}
           </ThemedText>
-          {profile.role === 'management' ? (
+          {profile.role === 'crew' ? (
             <ThemedText type="small" themeColor="textSecondary">
               {t('docs.readBy', { count: readCount, total: audience.length })}
             </ThemedText>

@@ -5,7 +5,7 @@ import { KeyboardAvoidingView, Pressable, StyleSheet, TextInput, View } from 're
 import { ThemedText } from '@/components/themed-text';
 import { Empty, Icon, Screen } from '@/components/ui';
 import { FontFamily, Spacing } from '@/constants/theme';
-import { channels } from '@/data/demo';
+import { store } from '@/data/store';
 import { dmOther, getMessages } from '@/data/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { t } from '@/i18n';
@@ -25,7 +25,7 @@ export default function ChatScreen() {
   }, [channelId, markChannelRead, items.length]);
 
   const other = dmOther(channelId, profile.id);
-  const channel = channels.find((c) => c.id === channelId);
+  const channel = store.channels.find((c) => c.id === channelId);
   const title = other ? other.name : channel ? `# ${channel.name}` : t('title.chat');
 
   const send = () => {

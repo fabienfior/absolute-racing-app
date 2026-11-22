@@ -56,7 +56,7 @@ export default function EventScreen() {
   const allMine = team ? getTravel(event.id, profile) : [];
   const upcoming = allMine.filter((t) => new Date(t.endsAt ?? t.startsAt).getTime() > Date.now());
   const myTravel = upcoming.length ? upcoming : allMine;
-  const canSeePhones = profile.role === 'management';
+  const canSeePhones = profile.role === 'crew';
 
   return (
     <Screen>

@@ -22,7 +22,7 @@ export default function NewFolderScreen() {
   const [url, setUrl] = useState('');
   const [error, setError] = useState(false);
 
-  if (profile.role !== 'management') {
+  if (profile.role !== 'crew') {
     return (
       <Screen>
         <ThemedText>{t('notify.onlyManagement')}</ThemedText>
