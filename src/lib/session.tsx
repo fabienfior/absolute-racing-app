@@ -365,7 +365,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
 /** Where the sign-in link in the email sends people back to: this app (or this web page). */
 function signInRedirectUrl() {
-  if (process.env.EXPO_OS === 'web' && typeof window !== 'undefined') return window.location.origin + '/';
+  if (process.env.EXPO_OS === 'web' && typeof window !== 'undefined')
+    return `${window.location.origin}${process.env.EXPO_PUBLIC_BASE_URL ?? ''}/`;
   return Linking.createURL('/');
 }
 
