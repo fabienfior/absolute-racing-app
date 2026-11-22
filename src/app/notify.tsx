@@ -14,7 +14,7 @@ import { t } from '@/i18n';
 const TARGETS: Target[] = [
   { type: 'all' },
   { type: 'role', role: 'driver' },
-  { type: 'role', role: 'management' },
+  { type: 'role', role: 'crew' },
   ...getCars().map((c) => ({ type: 'car' as const, carId: c.id })),
 ];
 
@@ -25,7 +25,7 @@ export default function NotifyScreen() {
   const [body, setBody] = useState('');
   const [target, setTarget] = useState<Target>(TARGETS[0]);
 
-  if (profile.role !== 'management') {
+  if (profile.role !== 'crew') {
     return (
       <Screen>
         <ThemedText>{t('notify.onlyManagement')}</ThemedText>

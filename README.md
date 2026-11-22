@@ -22,6 +22,11 @@ Built with Expo (React Native + TypeScript) and Supabase.
 
 Documents and alerts can target the whole team, one role, or one car.
 
+## Open it
+
+Web version (phone or computer): https://fabienfior.github.io/absolute-racing-app/ — published by
+`.github/workflows/web.yml` on every change to `main` (one-time setup: Settings → Pages → Source: GitHub Actions).
+
 ## Run it
 
 ```bash
@@ -31,14 +36,29 @@ npm run ios        # or scan the QR code with Expo Go
 npm run android
 ```
 
-The app runs on demo data (`src/data/demo.ts`) until Supabase is connected.
-Use the Profile tab to preview it as crew, a driver or a sponsor.
+Crew can preview the app as a driver or a sponsor from the More tab.
 
-## Connect Supabase
+## Supabase
 
-1. Create a project at supabase.com.
-2. Run `supabase/schema.sql` in the SQL editor.
-3. Copy `.env.example` to `.env` and fill in the URL and anon key.
+The app is connected to the team's Supabase project (`src/lib/supabase.ts`; the publishable key is
+safe in the app because row-level security decides what each person can see). Setting it up:
+
+1. In Supabase, open **SQL Editor**, paste `supabase/schema.sql` and run it (once).
+2. Paste `supabase/seed.sql` and run it: series, placeholder cars #1 and #2, chat channels, guide
+   headings and the 2027 calendar. Safe to run again after `node scripts/build-seed.mjs`.
+3. **Authentication → URL Configuration → Redirect URLs**: add `absoluteracingapp://**` (the app),
+   `exp://**` (testing in Expo Go) and `https://fabienfior.github.io/**` (the web version). The sign-in
+   email's link opens the app, which signs the person in. With custom SMTP, the email templates can
+   also show the 6-digit code `{{ .Token }}`, which the sign-in screen accepts too.
+4. Sign in to the app with your own email first: the first person to sign in becomes crew.
+
+Everyone else who signs in is a sponsor until crew adds them: put their email, role and car in the
+`invites` table before they sign in, or change `role` in `profiles` afterwards. Visitors who do not
+sign in see the public content (calendar, news, results).
+
+If the tables are not there yet, the app shows the demo data in `src/data/demo.ts`
+(`EXPO_PUBLIC_DEMO=1` forces it). All data access goes through `src/data/queries.ts`, which reads
+the store that `src/data/remote.ts` fills from the database.
 
 ## Languages
 
@@ -50,12 +70,11 @@ English, French, Simplified Chinese, Japanese, Thai and Malay. The app follows t
 - `src/app/document/[id].tsx`, `alerts.tsx`, `notify.tsx` – document viewer with read receipts, alert inbox, send-an-alert
 - `src/app/event/[id].tsx` – event page (links, schedule, crew, documents, travel)
 - `src/app/chat/[channelId].tsx` – chat
-- `src/data/queries.ts` – all data access (swap demo data for Supabase here)
-- `supabase/schema.sql` – tables and role-based access rules
+- `src/data/queries.ts` – all data access; `src/data/remote.ts` loads it from Supabase
+- `supabase/schema.sql` – tables and role-based access rules; `supabase/seed.sql` – starting data
 
 ## Still to do
 
-- Sign-in screen and Supabase-backed queries
 - Crew editing screens (events, travel, crew, documents, news, guide)
 - Push notifications for alerts, documents and messages
 - App icon and splash screen artwork from the logo
@@ -67,6 +86,8 @@ English, French, Simplified Chinese, Japanese, Thai and Malay. The app follows t
 ```
 python3 scripts/import-calendar.py Absolute_Racing_2027_Calendar.xlsx 2027
 ```
+
+Then `node scripts/build-seed.mjs` and run the new `supabase/seed.sql` in the Supabase SQL Editor.
 
 New venues go in the `VENUES` table at the top of the script.
 

@@ -16,7 +16,7 @@ export default function AlertsScreen() {
 
   return (
     <Screen>
-      {profile.role === 'management' ? (
+      {profile.role === 'crew' ? (
         <Button label={t('title.sendAlert')} icon="megaphone-outline" onPress={() => router.push('/notify')} />
       ) : null}
       {mine.length ? (

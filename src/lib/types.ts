@@ -1,6 +1,6 @@
-export type Role = 'management' | 'driver' | 'sponsor';
+export type Role = 'crew' | 'driver' | 'sponsor';
 
-export const TEAM_ROLES: Role[] = ['management', 'driver'];
+export const TEAM_ROLES: Role[] = ['crew', 'driver'];
 export const isTeam = (role: Role) => TEAM_ROLES.includes(role);
 
 export type Championship = {
@@ -22,7 +22,7 @@ export type Member = {
   role: Role;
   jobTitle: string; // e.g. Team manager, Race engineer, Driver, Mechanic
   carId?: string;
-  phone?: string; // visible to management only
+  phone?: string; // visible to crew only
 };
 
 export type Profile = Member;
@@ -144,18 +144,19 @@ export type Message = {
   id: string;
   channelId: string;
   author: string;
+  authorId?: string;
   body: string;
   sentAt: string;
 };
 
 export function isForMember(target: Target, member: Member) {
-  if (member.role === 'management') return true;
+  if (member.role === 'crew') return true;
   if (target.type === 'all') return true;
   if (target.type === 'role') return target.role === member.role;
   return target.carId === member.carId;
 }
 
-/** Our cars' finishing positions, entered by management after each session. */
+/** Our cars' finishing positions, entered by crew after each session. */
 export type TeamResult = {
   eventId: string;
   session: string; // e.g. "Race 1"
@@ -165,7 +166,7 @@ export type TeamResult = {
   className?: string;
 };
 
-/** Championship standings, entered by management (no series offers a data feed). */
+/** Championship standings, entered by crew (no series offers a data feed). */
 export type Standings = {
   championshipId: string;
   title: string; // e.g. "Drivers – Pro-Am"
