@@ -41,8 +41,10 @@ safe in the app because row-level security decides what each person can see). Se
 1. In Supabase, open **SQL Editor**, paste `supabase/schema.sql` and run it (once).
 2. Paste `supabase/seed.sql` and run it: series, placeholder cars #1 and #2, chat channels, guide
    headings and the 2027 calendar. Safe to run again after `node scripts/build-seed.mjs`.
-3. **Authentication → Emails**: in the *Magic Link* and *Confirm signup* templates, show the code
-   `{{ .Token }}`. People sign in by typing that 6-digit code; there are no passwords.
+3. **Authentication → URL Configuration → Redirect URLs**: add `absoluteracingapp://**` (the app),
+   `exp://**` (testing in Expo Go) and the web address if the app is used in a browser. The sign-in
+   email's link opens the app, which signs the person in. With custom SMTP, the email templates can
+   also show the 6-digit code `{{ .Token }}`, which the sign-in screen accepts too.
 4. Sign in to the app with your own email first: the first person to sign in becomes crew.
 
 Everyone else who signs in is a sponsor until crew adds them: put their email, role and car in the

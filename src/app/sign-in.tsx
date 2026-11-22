@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -16,12 +16,20 @@ import type { Role } from '@/lib/types';
  */
 export default function SignInScreen() {
   const theme = useTheme();
-  const { live, enter, requestCode, verifyCode } = useSession();
+  const { live, loading, signedIn, enter, requestCode, verifyCode } = useSession();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+
+  // Signed in by tapping the link in the email while this screen was open.
+  useEffect(() => {
+    if (sent && signedIn && !loading) {
+      router.dismissAll();
+      router.replace('/');
+    }
+  }, [sent, signedIn, loading]);
 
   const inputStyle = [styles.input, { color: theme.text, backgroundColor: theme.backgroundElement, borderColor: theme.border }];
 

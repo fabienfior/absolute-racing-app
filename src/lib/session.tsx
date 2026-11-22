@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Linking from 'expo-linking';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { alerts as demoAlerts, documentReads, members, messages as demoMessages, onboardFolders } from '@/data/demo';
@@ -21,6 +22,8 @@ type AppState = {
   live: boolean;
   /** True until the first load from the database is done. */
   loading: boolean;
+  /** True once a person is signed in with their account. */
+  signedIn: boolean;
   /** null until the person signs in or picks Guest on the welcome screen. */
   entered: 'team' | 'guest' | null;
   enter: (mode: 'team' | 'guest', role?: Role) => void;
@@ -136,25 +139,37 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   // Who is signed in (kept on the phone between launches), and the first load.
+  // Opening the sign-in link from the email also lands here (see signInFromLink).
   const userIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!db) return;
     let first = true;
-    db.auth.getSession().then(({ data }) => {
+    (async () => {
+      await signInFromLink(db, await Linking.getInitialURL()).catch(() => null);
+      const { data } = await db.auth.getSession();
       const uid = data.session?.user.id ?? null;
       userIdRef.current = uid;
       setUserId(uid);
       first = false;
       load(uid);
-    });
+    })();
     const { data: sub } = db.auth.onAuthStateChange((_event, session) => {
       const uid = session?.user.id ?? null;
       if (first || uid === userIdRef.current) return;
       userIdRef.current = uid;
       setUserId(uid);
+      setPreviewRole(null);
+      setLoading(true);
       load(uid);
     });
-    return () => sub.subscription.unsubscribe();
+    // The app was already open when the link was tapped.
+    const linkSub = Linking.addEventListener('url', ({ url }) => {
+      signInFromLink(db, url).catch(() => null);
+    });
+    return () => {
+      sub.subscription.unsubscribe();
+      linkSub.remove();
+    };
   }, [db, load]);
 
   // Chat and series "last seen" times are kept on the phone.
@@ -229,7 +244,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const requestCode = useCallback<AppState['requestCode']>(
     async (email) => {
       if (!db) return 'not-connected';
-      const { error } = await db.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: true } });
+      const { error } = await db.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        options: { shouldCreateUser: true, emailRedirectTo: signInRedirectUrl() },
+      });
       return error ? error.message : null;
     },
     [db],
@@ -339,10 +357,37 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ version, live, loading, entered, enter, requestCode, verifyCode, signOut, profile, canPreview, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage, folders, addFolder, addVideo, seriesSeenAt, markSeriesSeen }),
-    [version, live, loading, entered, enter, requestCode, verifyCode, signOut, profile, canPreview, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage, folders, addFolder, addVideo, seriesSeenAt, markSeriesSeen],
+    () => ({ version, live, loading, signedIn: live && !!me, entered, enter, requestCode, verifyCode, signOut, profile, canPreview, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage, folders, addFolder, addVideo, seriesSeenAt, markSeriesSeen }),
+    [version, live, loading, me, entered, enter, requestCode, verifyCode, signOut, profile, canPreview, setRole, alerts, sendAlert, docReads, markDocRead, readAlertIds, markAlertRead, channelReadAt, markChannelRead, messages, sendMessage, folders, addFolder, addVideo, seriesSeenAt, markSeriesSeen],
   );
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
+
+/** Where the sign-in link in the email sends people back to: this app (or this web page). */
+function signInRedirectUrl() {
+  if (process.env.EXPO_OS === 'web' && typeof window !== 'undefined') return window.location.origin + '/';
+  return Linking.createURL('/');
+}
+
+/**
+ * The link in the sign-in email comes back as …#access_token=…&refresh_token=… (or ?code=…).
+ * Turns it into a signed-in session. Returns true if the URL was a sign-in link.
+ */
+async function signInFromLink(db: NonNullable<typeof supabase>, url: string | null) {
+  if (!url) return false;
+  const params = new URLSearchParams([url.split('#')[1] ?? '', url.split('?')[1]?.split('#')[0] ?? ''].join('&'));
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+  const code = params.get('code');
+  if (!(accessToken && refreshToken) && !code) return false;
+  // Tidy the address bar on the web so the link is not reused.
+  if (process.env.EXPO_OS === 'web' && typeof window !== 'undefined') window.history.replaceState(null, '', window.location.pathname);
+  const { error } =
+    accessToken && refreshToken
+      ? await db.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      : await db.auth.exchangeCodeForSession(code!);
+  if (error) console.warn('[supabase] sign-in link:', error.message);
+  return !error;
 }
 
 export function useSession() {
